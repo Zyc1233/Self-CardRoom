@@ -8,19 +8,19 @@ sealed class ScreenPage(
 ) {
     object Reservation : ScreenPage(
         route = "房间预约",
-        iconSelect = R.drawable.reservation_on,
+        iconSelect = R.drawable.reservation,
         iconUnselect = R.drawable.reservation
     )
 
     object Login : ScreenPage(
         route = "登录",
-        iconSelect = R.drawable.login_on,
+        iconSelect = R.drawable.login,
         iconUnselect = R.drawable.login
     )
 
     object List : ScreenPage(
         route = "预约情况",
-        iconSelect = R.drawable.list_on,
+        iconSelect = R.drawable.list,
         iconUnselect = R.drawable.list,
         isShowText = true
     )

@@ -243,6 +243,7 @@ fun BackButton() {
     val context = LocalContext.current
     Button(
         onClick = {
+            isUserLoggedIn.value = false
             val intent = Intent(context, LoginActivity::class.java)
             context.startActivity(intent)
         },

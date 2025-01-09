@@ -301,6 +301,7 @@ fun LoginButton(
                     .map { preferences -> preferences[passwordKey] }.first()
                 if (storedPhone == phone && storedPassword == password) {
                     context.showToast("登录成功")
+                    isUserLoggedIn.value = true
                     navController.navigate(ScreenPage.Reservation.route){
                         popUpTo(navController.graph.startDestinationId){
                             saveState = true
@@ -459,8 +460,11 @@ fun CodeLoginButton(
     Button(
         onClick = {
             coroutineScope.launch {
-                if (code == generatedCode.value) {
+                if (phone.isBlank() || code.isBlank()){
+                  context.showToast("请将信息输入完整！")
+                } else if (code == generatedCode.value) {
                     context.showToast("登录成功")
+                    isUserLoggedIn.value = true
                     navController.navigate(ScreenPage.Reservation.route){
                         popUpTo(navController.graph.startDestinationId){
                             saveState = true
@@ -476,9 +480,9 @@ fun CodeLoginButton(
             }
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray),
-        modifier = Modifier.fillMaxWidth().height(40.dp)
+        modifier = Modifier.fillMaxWidth().height(50.dp)
     ) {
-        Text(text = stringResource(R.string.btn_login), color = Color.Black)
+        Text(text = stringResource(R.string.btn_login), color = Color.Black, fontSize = 25.sp)
     }
 }
 

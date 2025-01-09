@@ -1,6 +1,7 @@
 package com.example.cardroom1
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
@@ -16,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -26,9 +28,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.cardroom1.ui.theme.CardRoom1Theme
 
+
 var isUserLoggedIn = mutableStateOf(false)
-
-
 class TabBarActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,6 +101,7 @@ fun MainNavigationBar(navController: NavController) {
     )
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+    val context = LocalContext.current
 
     BottomAppBar(
         modifier = Modifier.fillMaxWidth(),
@@ -118,12 +120,18 @@ fun MainNavigationBar(navController: NavController) {
             NavigationBarItem(
                 selected = isSelected,
                 onClick = {
-                    navController.navigate(screenPage.route) {
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
+                    if (!isUserLoggedIn.value && screenPage.route!= ScreenPage.Login.route) {
+                        // 如果未登录且不是点击登录页面，跳转到登录页面
+                        navController.navigate(ScreenPage.Login.route)
+                        Toast.makeText(context,"请先登录", Toast.LENGTH_SHORT).show()
+                    } else {
+                        navController.navigate(screenPage.route) {
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-                        launchSingleTop = true
-                        restoreState = true
                     }
                 },
                 icon = {

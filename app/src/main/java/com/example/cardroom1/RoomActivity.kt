@@ -89,6 +89,8 @@ fun RoomLayout(){
             Spacer(Modifier.width(8.dp))
             LightSlider()
         }
+
+
     }
 }
 
@@ -161,6 +163,10 @@ fun LightSlider() {
         Text(text = " ${sliderValue.value.toInt()}", style = TextStyle(fontSize = 25.sp))
     }
 }
+
+
+
+
 
 @Composable
 fun RoomApp(){

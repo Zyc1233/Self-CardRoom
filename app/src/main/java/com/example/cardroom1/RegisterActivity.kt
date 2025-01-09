@@ -87,7 +87,9 @@ fun NewRegisterButton(
     Button(
         onClick = {
             coroutineScope.launch {
-                if (password == confirmPassword) {
+                if (phone.isBlank() || password.isBlank() || confirmPassword.isBlank()){
+                    context.showToast("请将信息填写完整！")
+                } else if (password == confirmPassword) {
                     val phoneKey = stringPreferencesKey("phone")
                     val passwordKey = stringPreferencesKey("password")
                     dataStore.edit { preferences ->
@@ -103,9 +105,9 @@ fun NewRegisterButton(
             }
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray),
-        modifier = Modifier.fillMaxWidth().height(40.dp)
+        modifier = Modifier.fillMaxWidth().height(50.dp)
     ) {
-        Text(text = stringResource(R.string.btn_register), color = Color.Black)
+        Text(text = stringResource(R.string.btn_register), color = Color.Black, fontSize = 25.sp)
     }
 }
 
