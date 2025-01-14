@@ -25,7 +25,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,13 +57,11 @@ fun OwnLayout(currentAvatarUrl: String, onAvatarChange: (String) -> Unit) {
         modifier = Modifier.fillMaxSize().padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(Modifier.height(16.dp))
-        Text(text = "个人信息", style = TextStyle(fontSize = 50.sp))
+
         Spacer(Modifier.height(16.dp))
         UserHead(currentAvatarUrl)
         ChangeHead(currentAvatarUrl, onAvatarChange)
         Spacer(Modifier.height(64.dp))
-        BackButton()
     }
 }
 

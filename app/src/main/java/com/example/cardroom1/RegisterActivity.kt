@@ -1,8 +1,8 @@
 package com.example.cardroom1
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -33,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.cardroom1.ui.theme.CardRoom1Theme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -42,35 +43,42 @@ class RegisterActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             CardRoom1Theme {
-                RegisterApp()
+                val navController = rememberNavController()
+                RegisterApp(navController)
             }
         }
     }
 }
 
 @Composable
-fun RegisterLayout() {
+fun RegisterLayout(navController: NavController) {
     val context = LocalContext.current
     val phone = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val confirmPassword = remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
-
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
-            Text(text = "用户注册", style = TextStyle(fontSize = 50.sp))
             Spacer(Modifier.height(16.dp))
             CommonPhoneText(phone, stringResource(R.string.phone))
             Spacer(Modifier.height(16.dp))
             NewPasswordText(password, stringResource(R.string.first_password), context)
             Spacer(Modifier.height(16.dp))
-            NewPasswordText(confirmPassword, stringResource(R.string.second_password),context)
+            NewPasswordText(confirmPassword, stringResource(R.string.second_password), context)
             Spacer(Modifier.height(16.dp))
-            NewRegisterButton(context, coroutineScope, phone.value, password.value, confirmPassword.value)
+            NewRegisterButton(
+                context,
+                coroutineScope,
+                phone.value,
+                password.value,
+                confirmPassword.value,
+                navController
+            )
         }
     }
 }
@@ -81,35 +89,52 @@ fun NewRegisterButton(
     coroutineScope: CoroutineScope,
     phone: String,
     password: String,
-    confirmPassword: String
+    confirmPassword: String,
+    navController: NavController
 ) {
     val dataStore = context.dataStore
     Button(
         onClick = {
             coroutineScope.launch {
-                if (phone.isBlank() || password.isBlank() || confirmPassword.isBlank()){
+                Log.d("RegisterActivity", "开始注册流程")
+                if (phone.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
                     context.showToast("请将信息填写完整！")
                 } else if (password == confirmPassword) {
-                    val phoneKey = stringPreferencesKey("phone")
-                    val passwordKey = stringPreferencesKey("password")
-                    dataStore.edit { preferences ->
-                        preferences[phoneKey] = phone
-                        preferences[passwordKey] = password
+                    try {
+                        val phoneKey = stringPreferencesKey("phone")
+                        val passwordKey = stringPreferencesKey("password")
+                        dataStore.edit { preferences ->
+                            preferences[phoneKey] = phone
+                            preferences[passwordKey] = password
+                        }
+                        context.showToast("注册成功")
+                        navController.navigate(ScreenPage.Login.route) {
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                        Log.d("RegisterActivity", "注册成功，跳转到登录页面")
+                    } catch (e: Exception) {
+                        context.showToast("注册失败: ${e.message}")
+                        Log.e("RegisterActivity", "注册失败: ${e.message}", e)
                     }
-                    context.showToast("注册成功")
-                    val intent = Intent(context, LoginActivity::class.java)
-                    context.startActivity(intent)
                 } else {
                     context.showToast("两次密码不一致")
+                    Log.d("RegisterActivity", "两次密码不一致")
                 }
             }
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray),
-        modifier = Modifier.fillMaxWidth().height(50.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp)
     ) {
         Text(text = stringResource(R.string.btn_register), color = Color.Black, fontSize = 25.sp)
     }
 }
+
 
 @Composable
 fun NewPasswordText(passwordState: MutableState<String>, label: String, context: Context) {
@@ -138,9 +163,10 @@ fun NewPasswordText(passwordState: MutableState<String>, label: String, context:
                 imeAction = ImeAction.Next
             ),
             trailingIcon = {
-                val image = if (passwordVisibility.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                val image =
+                    if (passwordVisibility.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                 val description = if (passwordVisibility.value) "隐藏密码" else "显示密码"
-                IconButton(onClick = { passwordVisibility.value =!passwordVisibility.value }) {
+                IconButton(onClick = { passwordVisibility.value = !passwordVisibility.value }) {
                     Icon(imageVector = image, contentDescription = description)
                 }
             }
@@ -149,17 +175,17 @@ fun NewPasswordText(passwordState: MutableState<String>, label: String, context:
     }
 }
 
-
 @Composable
-fun RegisterApp() {
-    RegisterLayout()
+fun RegisterApp(navController: NavController) {
+    RegisterLayout(navController)
 }
 
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview3() {
+fun RegisterPreview() {
     CardRoom1Theme {
-        RegisterLayout()
+        val navController = rememberNavController()
+        RegisterLayout(navController)
     }
 }

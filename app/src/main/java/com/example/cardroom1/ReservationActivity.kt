@@ -1,6 +1,5 @@
 package com.example.cardroom1
 
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -15,9 +14,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -26,30 +27,71 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.example.cardroom1.ui.theme.CardRoom1Theme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
 
 class ReservationActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             CardRoom1Theme {
-                val reservationId = intent.getLongExtra("reservationId", -1L)
-                val userName = intent.getStringExtra("userName") ?: ""
-                val selectedRoomsText = intent.getStringExtra("selectedRoomsText") ?: ""
-                val selectedDate = intent.getStringExtra("selectedDate") ?: ""
-                val selectedStartTime = intent.getStringExtra("selectedStartTime") ?: ""
-                val selectedEndTime = intent.getStringExtra("selectedEndTime") ?: ""
-                ReservationApp(reservationId, userName, selectedRoomsText, selectedDate, selectedStartTime, selectedEndTime)
+                val navController = rememberNavController()
+                val viewModel: ReservationViewModel = viewModel()
+                val currentBackStackEntry by navController.currentBackStackEntryAsState()
+                val reservationId = currentBackStackEntry?.arguments?.getLong("reservationId")?: -1L
+                ReservationApp(
+                    navController = navController,
+                    viewModel = viewModel,
+                    reservationId
+                )
             }
         }
     }
 }
+
+@Composable
+fun ReservationApp(
+    navController: NavController,
+    viewModel: ReservationViewModel,
+    reservationId: Long
+) {
+    val reservation = remember { mutableStateOf<Reservation?>(null) }
+    val isLoading = remember { mutableStateOf(true) }
+    LaunchedEffect(reservationId) {
+        launch(Dispatchers.IO) {
+            val res = viewModel.getReservationById(reservationId)
+            reservation.value = res
+            isLoading.value = false
+        }
+    }
+
+    if (isLoading.value) {
+        CircularProgressIndicator(modifier = Modifier.fillMaxSize())
+    } else {
+        reservation.value?.let { res ->
+            ReservationLayout(
+                reservationId = res.id,
+                userName = res.user,
+                selectedRoomsText = res.room,
+                selectedDate = res.date,
+                selectedStartTime = res.time1,
+                selectedEndTime = res.time2,
+                navController = navController,
+                viewModel = viewModel
+            )
+        }
+    }
+}
+
 
 
 @Composable
@@ -59,17 +101,16 @@ fun ReservationLayout(
     selectedRoomsText: String,
     selectedDate: String,
     selectedStartTime: String,
-    selectedEndTime: String
+    selectedEndTime: String,
+    navController: NavController,
+    viewModel: ReservationViewModel
 ) {
-    val context = LocalContext.current
-    val database = DatabaseHelper.getInstance(context)
     val reservation = remember { mutableStateOf<Reservation?>(null) }
     val isLoading = remember { mutableStateOf(true) }
-
     LaunchedEffect(reservationId) {
         withContext(Dispatchers.IO) {
-            val allReservations = database.reservationDao().getAllReservations().value?: listOf()
-            reservation.value = allReservations.find { it.id == reservationId }
+            val allReservations = viewModel.getReservationById(reservationId)
+            reservation.value = allReservations
             isLoading.value = false
         }
     }
@@ -78,11 +119,7 @@ fun ReservationLayout(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "预约信息",
-            style = TextStyle(color = Color.Black, fontSize = 50.sp)
-        )
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(16.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(text = " 用 户 名： ", style = TextStyle(color = Color.Black, fontSize = 35.sp))
             Spacer(Modifier.width(8.dp))
@@ -109,19 +146,20 @@ fun ReservationLayout(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Spacer(Modifier.width(40.dp))
-            CancelButton(database, reservationId)
+            CancelButton(reservationId, navController, viewModel)
             Spacer(Modifier.width(16.dp))
-            SRoomButton()
+            SRoomButton(navController)
         }
     }
 }
 
 
-//取消预约
+// 取消预约
 @Composable
 fun CancelButton(
-    database: DatabaseHelper,
-    reservationId: Long
+    reservationId: Long,
+    navController: NavController,
+    viewModel: ReservationViewModel
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -136,13 +174,15 @@ fun CancelButton(
                 Button(
                     onClick = {
                         coroutineScope.launch {
-                            val reservation = database.reservationDao().getReservationById(reservationId)
-                            if (reservation != null){
-                                database.reservationDao().deleteReservationById(reservationId)
-                            }
+                            viewModel.deleteReservation(reservationId)
                         }
-                        val intent = Intent(context, IndexActivity::class.java)
-                        context.startActivity(intent)
+                        navController.navigate(ScreenPage.Index.route) {
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                         Toast.makeText(context, "取消成功", Toast.LENGTH_SHORT).show()
                         openDialog.value = false
                     },
@@ -171,13 +211,18 @@ fun CancelButton(
 }
 
 
+
 @Composable
-fun SRoomButton() {
-    val context = LocalContext.current
+fun SRoomButton(navController: NavController) {
     Button(
         onClick = {
-            val intent = Intent(context, RoomActivity::class.java)
-            context.startActivity(intent)
+            navController.navigate(ScreenPage.Room.route){
+                popUpTo(navController.graph.startDestinationId) {
+                    saveState = true
+                }
+                launchSingleTop = true
+                restoreState = true
+            }
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray)
     ) {
@@ -186,34 +231,3 @@ fun SRoomButton() {
 }
 
 
-@Composable
-fun ReservationApp(
-    reservationId: Long,
-    userName: String,
-    selectedRoomsText: String,
-    selectedDate: String,
-    selectedStartTime: String,
-    selectedEndTime: String) {
-    ReservationLayout(
-        reservationId,
-        userName,
-        selectedRoomsText,
-        selectedDate,
-        selectedStartTime,
-        selectedEndTime)
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ReservationPreview2() {
-    CardRoom1Theme {
-        ReservationLayout(
-            reservationId = 0,
-            userName = "张三",
-            selectedRoomsText = "麻将室1",
-            selectedDate = "2023-12-25",
-            selectedStartTime = "14:00",
-            selectedEndTime = "16:00"
-        )
-    }
-}

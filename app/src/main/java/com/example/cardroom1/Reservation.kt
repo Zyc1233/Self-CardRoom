@@ -1,11 +1,12 @@
 package com.example.cardroom1
 
-import androidx.lifecycle.LiveData
 import androidx.room.*
+import kotlinx.coroutines.flow.Flow
+
 
 @Entity(tableName = "reservations")
 data class Reservation(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @PrimaryKey(autoGenerate = true) var id: Long = 0,
     @ColumnInfo(name = "user") val user: String,
     @ColumnInfo(name = "room") val room: String,
     @ColumnInfo(name = "date") val date: String,
@@ -20,7 +21,7 @@ interface ReservationDao {
     suspend fun insertReservation(reservation: Reservation): Long
 
     @Query("SELECT * FROM reservations")
-    fun getAllReservations(): LiveData<List<Reservation>>
+    fun getAllReservations(): Flow<List<Reservation>>
 
     @Query("DELETE FROM reservations WHERE id = :reservationId")
     suspend fun deleteReservationById(reservationId: Long)
@@ -43,6 +44,3 @@ interface ReservationDao {
         endTime: String
     ): Int
 }
-
-
-

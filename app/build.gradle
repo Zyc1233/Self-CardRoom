@@ -6,6 +6,7 @@ plugins {
     id "org.jetbrains.kotlin.kapt"
     id 'com.google.devtools.ksp'
     id 'androidx.room'
+    id 'androidx.navigation.safeargs'
 }
 
 android {
@@ -65,32 +66,39 @@ dependencies {
     debugImplementation libs.androidx.ui.test.manifest
 
     def room_version = "2.6.1"
-    def nav_version = "2.8.4"
+    def nav_version = "2.5.3"
 
-    implementation("androidx.room:room-runtime:$room_version")
-    implementation("androidx.room:room-ktx:$room_version")
-    kapt("androidx.room:room-compiler:$room_version")
+    // Room
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-rxjava2:$room_version"
     implementation "androidx.room:room-rxjava3:$room_version"
     implementation "androidx.room:room-guava:$room_version"
     testImplementation "androidx.room:room-testing:$room_version"
-    implementation "androidx.compose.runtime:runtime-livedata:1.0.0-beta01"
     implementation "androidx.room:room-paging:$room_version"
+    // Compose
     implementation 'androidx.compose.runtime:runtime:1.4.0'
     implementation 'androidx.compose.material:material-icons-core:1.5.0'
     implementation 'androidx.compose.material:material-icons-extended:1.6.2'
+    implementation "androidx.compose.runtime:runtime-livedata:1.0.0-beta01"
     implementation "androidx.datastore:datastore-preferences:1.0.0"
+    // Hilt
     implementation "com.google.dagger:hilt-android:2.51"
     kapt "com.google.dagger:hilt-compiler:2.51"
+    // Swipe to dismiss
     implementation "me.saket.swipe:swipe:1.3.0"
+    // Material3
     implementation "androidx.compose.material3:material3:1.3.0-beta05"
+    // Coil
     implementation 'io.coil-kt:coil-compose:2.4.0'
-    implementation "androidx.navigation:navigation-compose:$nav_version"
+    // Navigation
     implementation "androidx.navigation:navigation-fragment:$nav_version"
     implementation "androidx.navigation:navigation-ui:$nav_version"
     implementation "androidx.navigation:navigation-dynamic-features-fragment:$nav_version"
     androidTestImplementation "androidx.navigation:navigation-testing:$nav_version"
+    implementation 'androidx.navigation:navigation-compose:2.6.0' 
+    // KotlinX Serialization
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3"
-    implementation "io.coil-kt:coil-compose:2.4.0"
 }

@@ -6,7 +6,7 @@ sealed class ScreenPage(
     val iconUnselect: Int,
     val isShowText: Boolean = true
 ) {
-    object Reservation : ScreenPage(
+    object Index : ScreenPage(
         route = "房间预约",
         iconSelect = R.drawable.reservation,
         iconUnselect = R.drawable.reservation
@@ -35,5 +35,23 @@ sealed class ScreenPage(
         route = "房间",
         iconSelect = R.drawable.home,
         iconUnselect = R.drawable.home
+    )
+
+    object Forget : ScreenPage(
+        route = "忘记密码",
+        iconUnselect = R.drawable.own,
+        iconSelect =R.drawable.own
+    )
+
+    object Register : ScreenPage(
+        route = "注册",
+        iconUnselect = R.drawable.own,
+        iconSelect =R.drawable.own
+    )
+
+    object Reservation : ScreenPage(
+        route = "预约信息",
+        iconSelect = R.drawable.own,
+        iconUnselect = R.drawable.own
     )
 }

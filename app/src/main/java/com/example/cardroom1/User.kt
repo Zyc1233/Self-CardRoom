@@ -28,5 +28,14 @@ interface UserDao {
 
     @Query("SELECT * FROM users WHERE phone = :phone")
     suspend fun getUserByPhone(phone: String): User?
+
+    @Transaction
+    suspend fun resetUserPassword(phone: String, newPassword: String) {
+        val user = getUserByPhone(phone)
+        if (user!= null) {
+            val updatedUser = user.copy(password = newPassword)
+            insertUser(updatedUser)
+        }
+    }
 }
 

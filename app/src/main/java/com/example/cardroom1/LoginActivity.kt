@@ -1,7 +1,6 @@
 package com.example.cardroom1
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -63,8 +62,6 @@ class LoginActivity : ComponentActivity() {
 }
 
 
-
-
 @Composable
 fun LoginApp(navController: NavController) {
     val loginOptions = listOf("密码登录", "验证码登录")
@@ -75,7 +72,8 @@ fun LoginApp(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
@@ -89,7 +87,6 @@ fun LoginApp(navController: NavController) {
                 )
             }
         }
-
         when (selectedLoginOption) {
             "密码登录" -> PasswordLoginLayout(phone, password, navController)
             "验证码登录" -> CodeLoginLayout(phone, navController)
@@ -122,7 +119,8 @@ fun LoginOptionRadioButton(
 fun PasswordLoginLayout(
     phoneState: MutableState<String>,
     passwordState: MutableState<String>,
-    navController: NavController) {
+    navController: NavController
+) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -138,7 +136,7 @@ fun PasswordLoginLayout(
             Spacer(modifier = Modifier.height(32.dp))
             CommonPhoneText(phoneState, stringResource(R.string.phone))
             Spacer(modifier = Modifier.height(24.dp))
-            CommonPasswordText(passwordState, stringResource(R.string.password))
+            CommonPasswordText(passwordState, stringResource(R.string.password),navController)
             Spacer(modifier = Modifier.height(24.dp))
             RememberPassword()
             Spacer(modifier = Modifier.height(16.dp))
@@ -147,7 +145,8 @@ fun PasswordLoginLayout(
                 coroutineScope,
                 phoneState.value,
                 passwordState.value,
-                navController)
+                navController
+            )
         }
     }
 }
@@ -156,7 +155,8 @@ fun PasswordLoginLayout(
 @Composable
 fun CodeLoginLayout(
     phoneState: MutableState<String>,
-    navController: NavController) {
+    navController: NavController
+) {
     val context = LocalContext.current
     val phone = remember { mutableStateOf("") }
     val code = remember { mutableStateOf("") }
@@ -174,7 +174,14 @@ fun CodeLoginLayout(
             Spacer(modifier = Modifier.height(24.dp))
             CodeText(coroutineScope, code, generatedCode) // 传递generatedCode
             Spacer(modifier = Modifier.height(24.dp))
-            CodeLoginButton(context, coroutineScope, phoneState.value, code.value, generatedCode, navController)
+            CodeLoginButton(
+                context,
+                coroutineScope,
+                phoneState.value,
+                code.value,
+                generatedCode,
+                navController
+            )
         }
     }
 }
@@ -183,7 +190,8 @@ fun CodeLoginLayout(
 @Composable
 fun CommonPhoneText(
     phoneState: MutableState<String>,
-    label: String) {
+    label: String
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -208,7 +216,9 @@ fun CommonPhoneText(
 @Composable
 fun CommonPasswordText(
     passwordState: MutableState<String>,
-    label: String) {
+    label: String,
+    navController: NavController
+) {
     val passwordVisibility = remember { mutableStateOf(false) }
     Row(
         verticalAlignment = Alignment.CenterVertically
@@ -226,17 +236,20 @@ fun CommonPasswordText(
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Next
             ),
-            modifier = Modifier.width(150.dp).height(55.dp),
+            modifier = Modifier
+                .width(150.dp)
+                .height(55.dp),
             trailingIcon = {
-                val image = if (passwordVisibility.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                val image =
+                    if (passwordVisibility.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                 val description = if (passwordVisibility.value) "隐藏密码" else "显示密码"
-                IconButton(onClick = { passwordVisibility.value =!passwordVisibility.value }) {
+                IconButton(onClick = { passwordVisibility.value = !passwordVisibility.value }) {
                     Icon(imageVector = image, contentDescription = description)
                 }
             }
         )
         Spacer(modifier = Modifier.width(16.dp))
-        ForgetButton()
+        ForgetButton(navController)
     }
 }
 
@@ -276,8 +289,9 @@ fun LoginAndRegisterButtons(
             coroutineScope,
             phone,
             password,
-            navController)
-        RegisterButton(context)
+            navController
+        )
+        RegisterButton(navController)
     }
 }
 
@@ -302,15 +316,13 @@ fun LoginButton(
                 if (storedPhone == phone && storedPassword == password) {
                     context.showToast("登录成功")
                     isUserLoggedIn.value = true
-                    navController.navigate(ScreenPage.Reservation.route){
-                        popUpTo(navController.graph.startDestinationId){
+                    navController.navigate(ScreenPage.Index.route) {
+                        popUpTo(navController.graph.startDestinationId) {
                             saveState = true
                         }
                         launchSingleTop = true
                         restoreState = true
                     }
-//                    val intent = Intent(context,IndexActivity::class.java)
-//                    context.startActivity(intent)
                 } else {
                     context.showToast("密码错误或账号未注册")
                 }
@@ -318,19 +330,25 @@ fun LoginButton(
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray)
     ) {
-        Text(text = stringResource(R.string.btn_login), style = TextStyle(color = Color.Black, fontSize = 32.sp))
+        Text(
+            text = stringResource(R.string.btn_login),
+            style = TextStyle(color = Color.Black, fontSize = 32.sp)
+        )
     }
 }
 
 
 @Composable
-fun ForgetButton() {
-    val context = LocalContext.current
+fun ForgetButton(navController: NavController) {
     Button(
         onClick = {
-            val intent = Intent(context, ForgetActivity::class.java)
-            context.startActivity(intent)
-
+            navController.navigate(ScreenPage.Forget.route) {
+                popUpTo(navController.graph.startDestinationId) {
+                    saveState = true
+                }
+                launchSingleTop = true
+                restoreState = true
+            }
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray)
     ) {
@@ -339,15 +357,24 @@ fun ForgetButton() {
 }
 
 @Composable
-fun RegisterButton(context: Context) {
+fun RegisterButton(
+    navController: NavController) {
     Button(
         onClick = {
-            val intent = Intent(context, RegisterActivity::class.java)
-            context.startActivity(intent)
+            navController.navigate(ScreenPage.Register.route) {
+                popUpTo(navController.graph.startDestinationId) {
+                    saveState = true
+                }
+                launchSingleTop = true
+                restoreState = true
+            }
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray)
     ) {
-        Text(text = stringResource(R.string.btn_register), style = TextStyle(color = Color.Black, fontSize = 32.sp))
+        Text(
+            text = stringResource(R.string.btn_register),
+            style = TextStyle(color = Color.Black, fontSize = 32.sp)
+        )
     }
 }
 
@@ -375,7 +402,9 @@ fun CodeText(
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Done
             ),
-            modifier = Modifier.width(130.dp).height(55.dp)
+            modifier = Modifier
+                .width(130.dp)
+                .height(55.dp)
         )
         Spacer(modifier = Modifier.width(16.dp))
         CodeButton(
@@ -433,7 +462,9 @@ fun CodeButton(
             }
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray),
-        modifier = Modifier.width(120.dp).height(45.dp)
+        modifier = Modifier
+            .width(120.dp)
+            .height(45.dp)
     ) {
         Text(
             text = if (isCoolingDown.value) {
@@ -460,27 +491,27 @@ fun CodeLoginButton(
     Button(
         onClick = {
             coroutineScope.launch {
-                if (phone.isBlank() || code.isBlank()){
-                  context.showToast("请将信息输入完整！")
+                if (phone.isBlank() || code.isBlank()) {
+                    context.showToast("请将信息输入完整！")
                 } else if (code == generatedCode.value) {
                     context.showToast("登录成功")
                     isUserLoggedIn.value = true
-                    navController.navigate(ScreenPage.Reservation.route){
-                        popUpTo(navController.graph.startDestinationId){
+                    navController.navigate(ScreenPage.Index.route) {
+                        popUpTo(navController.graph.startDestinationId) {
                             saveState = true
                         }
                         launchSingleTop = true
                         restoreState = true
                     }
-//                    val intent = Intent(context,IndexActivity::class.java)
-//                    context.startActivity(intent)
                 } else {
                     context.showToast("手机号或验证码错误")
                 }
             }
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray),
-        modifier = Modifier.fillMaxWidth().height(50.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp)
     ) {
         Text(text = stringResource(R.string.btn_login), color = Color.Black, fontSize = 25.sp)
     }
@@ -495,6 +526,7 @@ fun Context.showToast(message: String) {
 @Composable
 fun LoginPreview() {
     CardRoom1Theme {
-//        LoginApp()
+        val navController = rememberNavController()
+        LoginApp(navController)
     }
 }

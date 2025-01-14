@@ -16,7 +16,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,6 +34,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.cardroom1.ui.theme.CardRoom1Theme
 
 class RoomActivity : ComponentActivity() {
@@ -39,18 +44,18 @@ class RoomActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             CardRoom1Theme {
-                RoomApp()
+                val navController = rememberNavController()
+                RoomApp(navController)
             }
         }
     }
 }
 
 @Composable
-fun RoomLayout(){
+fun RoomLayout(navController: NavController){
     Column (modifier = Modifier.fillMaxSize().padding(top = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally){
-        Text(text = "房间设备控制", style = TextStyle(color = Color.Black, fontSize = 50.sp))
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(16.dp))
         Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment =  Alignment.CenterVertically) {
@@ -89,8 +94,8 @@ fun RoomLayout(){
             Spacer(Modifier.width(8.dp))
             LightSlider()
         }
-
-
+        Spacer(Modifier.height(16.dp))
+        RoomBackButton(navController)
     }
 }
 
@@ -148,8 +153,15 @@ fun FanSwitch(  ){
 @Composable
 fun LightSlider() {
     val sliderValue = remember { mutableStateOf(80f) }
-    Row (modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically){
+    val customSliderColors = SliderDefaults.colors(
+        activeTrackColor = Color.Green,
+        inactiveTrackColor = Color.LightGray, // 自定义非活动轨道的颜色
+        thumbColor = Color.Yellow // 自定义滑块的颜色
+    )
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Slider(
             value = sliderValue.value,
             onValueChange = { newValue ->
@@ -157,20 +169,39 @@ fun LightSlider() {
             },
             valueRange = 0f..100f,
             steps = 10,
-            modifier = Modifier.width(200.dp)
+            modifier = Modifier.width(200.dp),
+            colors = customSliderColors // 应用自定义颜色
         )
         Spacer(modifier = Modifier.width(16.dp))
-        Text(text = " ${sliderValue.value.toInt()}", style = TextStyle(fontSize = 25.sp))
+        Text(
+            text = " ${sliderValue.value.toInt()}",
+            style = TextStyle(fontSize = 25.sp)
+        )
+    }
+}
+
+
+@Composable
+fun RoomBackButton(navController: NavController){
+    Button(onClick = {
+        navController.navigate(ScreenPage.Index.route){
+            popUpTo(navController.graph.startDestinationId) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
+    },
+        colors = ButtonDefaults.buttonColors(Color.LightGray)) {
+        Text(text = "退出房间", fontSize = 30.sp)
     }
 }
 
 
 
-
-
 @Composable
-fun RoomApp(){
-    RoomLayout()
+fun RoomApp(navController: NavController){
+    RoomLayout(navController)
 }
 
 
@@ -178,6 +209,7 @@ fun RoomApp(){
 @Composable
 fun RoomPreview() {
     CardRoom1Theme {
-        RoomLayout()
+        val navController = rememberNavController()
+        RoomLayout(navController)
     }
 }

@@ -2,8 +2,8 @@ package com.example.cardroom1
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
-import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -29,6 +29,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -36,7 +37,9 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,10 +55,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cardroom1.ui.theme.CardRoom1Theme
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.os.bundleOf
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -68,20 +72,12 @@ class IndexActivity : ComponentActivity() {
         setContent {
             CardRoom1Theme {
                 val navController = rememberNavController()
-                val reservationId = intent.getLongExtra("reservationId", -1L)
-                val userName = intent.getStringExtra("userName") ?: ""
-                val selectedRoomsText = intent.getStringExtra("selectedRoomsText") ?: ""
-                val selectedDate = intent.getStringExtra("selectedDate") ?: ""
-                val selectedStartTime = intent.getStringExtra("selectedStartTime") ?: ""
-                val selectedEndTime = intent.getStringExtra("selectedEndTime") ?: ""
+                val viewModel: ReservationViewModel = viewModel()
+                val reservations by viewModel.reservations.collectAsState(emptyList())
                 IndexApp(
                     navController = navController,
-                    reservationId = reservationId,
-                    userName = userName,
-                    selectedRoomsText = selectedRoomsText,
-                    selectedDate = selectedDate,
-                    selectedStartTime = selectedStartTime,
-                    selectedEndTime = selectedEndTime
+                    viewModel = viewModel,
+                    reservations = reservations
                 )
             }
         }
@@ -92,129 +88,71 @@ class IndexActivity : ComponentActivity() {
 @Composable
 fun IndexApp(
     navController: NavController,
-    reservationId: Long = -1L,
-    userName: String = "",
-    selectedRoomsText: String = "",
-    selectedDate: String = "",
-    selectedStartTime: String = "",
-    selectedEndTime: String = ""
+    viewModel: ReservationViewModel,
+    reservations: List<Reservation>
 ) {
-    val context = LocalContext.current
-    val database = DatabaseHelper.getInstance(context)
-    val reservationsLiveData = database.reservationDao().getAllReservations()
-    val initialReservations = reservationsLiveData.observeAsState(initial = listOf()).value
-    val reservations: MutableState<List<Reservation>> = remember {
-        mutableStateOf(initialReservations)
-    }
-    val coroutineScope = rememberCoroutineScope()
+    val selectedRoomsTextState = remember { mutableStateOf("") }
+    val selectedDateState = remember { mutableStateOf("") }
+    val selectedStartTimeState = remember { mutableStateOf("") }
+    val selectedEndTimeState = remember { mutableStateOf("") }
+    val userNameState = remember { mutableStateOf("") }
+    val reservationId = remember { mutableLongStateOf(0L) }
 
-
-    LaunchedEffect(Unit) {
-        coroutineScope.launch(Dispatchers.IO) {
-            val newReservations = database.reservationDao().getAllReservations().value?: listOf()
-            reservations.value = newReservations
-        }
+    // 获取从 Reservation 界面传递回来的修改信息
+    val reservationData = navController.previousBackStackEntry?.savedStateHandle?.get<Bundle>("reservationData")
+    if (reservationData!= null) {
+        userNameState.value = reservationData.getString("userName", "")!!
+        selectedRoomsTextState.value = reservationData.getString("selectedRoomsText", "")!!
+        selectedDateState.value = reservationData.getString("selectedDate", "")!!
+        selectedStartTimeState.value = reservationData.getString("selectedStartTime", "")!!
+        selectedEndTimeState.value = reservationData.getString("selectedEndTime", "")!!
+        reservationId.longValue = reservationData.getLong("reservationId", 0L)
+        navController.previousBackStackEntry?.savedStateHandle?.remove<Bundle>("reservationData")
     }
+
     Column(
         modifier = Modifier.fillMaxSize().padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.height(16.dp))
-        Text(text = if (reservationId == -1L) "房间预约" else "修改预约", style = TextStyle(color = Color.Black, fontSize = 50.sp))
-        Spacer(Modifier.height(16.dp))
         ImageGroup()
         Spacer(Modifier.height(16.dp))
-        val selectedRoomsTextState = remember { mutableStateOf(selectedRoomsText) }
         RoomText(selectedRoomsTextState)
         Spacer(Modifier.height(16.dp))
-        val selectedDateState = remember { mutableStateOf(selectedDate) }
         DateText(selectedDateState)
         Spacer(Modifier.height(16.dp))
-        val selectedStartTimeState = remember { mutableStateOf(selectedStartTime) }
         StartTimeText(selectedStartTimeState)
         Spacer(Modifier.height(16.dp))
-        val selectedEndTimeState = remember { mutableStateOf(selectedEndTime) }
         EndTimeText(selectedEndTimeState)
         Spacer(Modifier.height(16.dp))
-        val userNameState = remember { mutableStateOf(userName) }
         UserName(userNameState)
         Spacer(Modifier.height(16.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             ReservationButton(
-                database,
-                reservations,
+                viewModel,
                 userNameState,
                 selectedRoomsTextState,
                 selectedDateState,
                 selectedStartTimeState,
-                selectedEndTimeState
+                selectedEndTimeState,
+                navController
             )
             Spacer(Modifier.width(8.dp))
             ModifyButton(
-                reservationId = reservationId,
-                userName = userNameState,
-                selectedRoomsText = selectedRoomsTextState,
-                selectedDate = selectedDateState,
-                selectedStartTime = selectedStartTimeState,
-                selectedEndTime = selectedEndTimeState
+                reservationId.longValue,
+                userNameState,
+                selectedRoomsTextState,
+                selectedDateState,
+                selectedStartTimeState,
+                selectedEndTimeState,
+                navController,
+                viewModel
             )
             Spacer(Modifier.width(8.dp))
             SituationButton(navController)
         }
     }
 }
-
-//@Composable
-//fun IndexLayout() {
-//    val context = LocalContext.current
-//    val database = DatabaseHelper.getInstance(context)
-//    val reservationsLiveData = database.reservationDao().getAllReservations()
-//    val initialReservations = reservationsLiveData.observeAsState(initial = listOf()).value
-//    val reservations: MutableState<List<Reservation>> = remember {
-//        mutableStateOf(initialReservations)
-//    }
-//    val coroutineScope = rememberCoroutineScope()
-//
-//    LaunchedEffect(Unit) {
-//        coroutineScope.launch(Dispatchers.IO) {
-//            val newReservations = database.reservationDao().getAllReservations().value?: listOf()
-//            reservations.value = newReservations
-//        }
-//    }
-//
-//    Column(
-//        modifier = Modifier.fillMaxSize().padding(8.dp),
-//        horizontalAlignment = Alignment.CenterHorizontally
-//    ) {
-//        Spacer(Modifier.height(16.dp))
-//        Text(text = "房间预约", style = TextStyle(color = Color.Black, fontSize = 50.sp))
-//        Spacer(Modifier.height(16.dp))
-//        ImageGroup()
-//        Spacer(Modifier.height(16.dp))
-//        val selectedRoomsText = remember { mutableStateOf("") }
-//        RoomText(selectedRoomsText)
-//        Spacer(Modifier.height(16.dp))
-//        val selectedDate = remember { mutableStateOf("") }
-//        DateText(selectedDate)
-//        Spacer(Modifier.height(16.dp))
-//        val selectedStartTime = remember { mutableStateOf("") }
-//        StartTimeText(selectedStartTime)
-//        Spacer(Modifier.height(16.dp))
-//        val selectedEndTime = remember { mutableStateOf("") }
-//        EndTimeText(selectedEndTime)
-//        Spacer(Modifier.height(16.dp))
-//        val userName = remember { mutableStateOf("") }
-//        UserName(userName)
-//        Spacer(Modifier.height(16.dp))
-//        Row(verticalAlignment = Alignment.CenterVertically) {
-//            ReservationButton(database, reservations, userName, selectedRoomsText, selectedDate, selectedStartTime, selectedEndTime)
-//            Spacer(Modifier.width(8.dp))
-//            IModifyButton()
-//            Spacer(Modifier.width(8.dp))
-//            SituationButton()
-//        }
-//    }
-//}
 
 
 @Composable
@@ -462,99 +400,122 @@ fun UserName(userName: MutableState<String>) {
     )
 }
 
-//预约
+// 预约
 @Composable
 fun ReservationButton(
-    database: DatabaseHelper,
-    reservations: MutableState<List<Reservation>>,
+    viewModel: ReservationViewModel,
     userName: MutableState<String>,
     selectedRoomsText: MutableState<String>,
     selectedDate: MutableState<String>,
     selectedStartTime: MutableState<String>,
-    selectedEndTime: MutableState<String>
+    selectedEndTime: MutableState<String>,
+    navController: NavController
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val isLoading = remember { mutableStateOf(false) }
+    val showDialog = remember { mutableStateOf(false) } // 新增：用于控制弹窗的显示
 
     Button(
         onClick = {
-            if (userName.value.isBlank()
-                || selectedRoomsText.value.isBlank()
-                || selectedDate.value.isBlank()
-                || selectedStartTime.value.isBlank()
-                || selectedEndTime.value.isBlank()) {
-                Toast.makeText(context, "请将信息输入完整", Toast.LENGTH_SHORT).show()
-                return@Button
-            }
-            try {
-                val sdf = SimpleDateFormat("HH:mm", Locale.CHINA)
-                val startTime = sdf.parse(selectedStartTime.value)
-                if (startTime == null) {
-                    Toast.makeText(context, "时间格式解析出错，请检查开始时间格式", Toast.LENGTH_SHORT).show()
-                    return@Button
-                }
-                val endTime = sdf.parse(selectedEndTime.value)
-                if (endTime == null) {
-                    Toast.makeText(context, "时间格式解析出错，请检查结束时间格式", Toast.LENGTH_SHORT).show()
-                    return@Button
-                }
-                if (startTime.after(endTime)) {
-                    Toast.makeText(context, "起始时间不能晚于结束时间，请重新选择时间后再操作", Toast.LENGTH_SHORT).show()
-                    return@Button
-                }
-            } catch (e: Exception) {
-                Toast.makeText(context, "时间格式解析出错，请检查输入的时间格式", Toast.LENGTH_SHORT).show()
-                return@Button
-            }
-
-            coroutineScope.launch {
-                val newReservation = Reservation(
-                    user = userName.value,
-                    room = selectedRoomsText.value,
-                    date = selectedDate.value,
-                    time1 = selectedStartTime.value,
-                    time2 = selectedEndTime.value
-                )
-                val isDuplicate = ReservationManager.isDuplicateReservation(context, newReservation)
-                if (isDuplicate) {
-                    Toast.makeText(context, "该时间段已有预约，无法重复预约", Toast.LENGTH_SHORT).show()
-                    return@launch
-                }
-                val reservationId = ReservationManager.insertReservation(context, newReservation)
-                if (reservationId!= -1L) {
-                    val intent = Intent(context, ReservationActivity::class.java)
-                    intent.putExtra("reservationId", reservationId)
-                    intent.putExtra("userName", userName.value)
-                    intent.putExtra("selectedRoomsText", selectedRoomsText.value)
-                    intent.putExtra("selectedDate", selectedDate.value)
-                    intent.putExtra("selectedStartTime", selectedStartTime.value)
-                    intent.putExtra("selectedEndTime", selectedEndTime.value)
-                    context.startActivity(intent)
-                } else {
-                    Toast.makeText(context, "插入数据库失败", Toast.LENGTH_SHORT).show()
-                }
-            }
+            showDialog.value = true // 点击按钮时显示弹窗
         },
-        colors = ButtonDefaults.buttonColors(Color.LightGray)
+        colors = ButtonDefaults.buttonColors(Color.LightGray),
+        enabled =!isLoading.value
     ) {
-        Text(text = "预约", style = TextStyle(color = Color.Black, fontSize = 21.sp))
+        if (isLoading.value) {
+            CircularProgressIndicator(color = Color.Black, modifier = Modifier.size(20.dp))
+        } else {
+            Text(text = "预约", style = TextStyle(color = Color.Black, fontSize = 21.sp))
+        }
+    }
+
+    if (showDialog.value) { // 显示弹窗
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text(text = "确认预约") },
+            text = { Text("是否确认预约？") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog.value = false
+                        if (!isLoading.value) {
+                            isLoading.value = true
+                            coroutineScope.launch {
+                                try {
+                                    val newReservation = Reservation(
+                                        user = userName.value,
+                                        room = selectedRoomsText.value,
+                                        date = selectedDate.value,
+                                        time1 = selectedStartTime.value,
+                                        time2 = selectedEndTime.value
+                                    )
+                                    Log.d("ReservationButton", "开始验证预约信息：$newReservation")
+                                    if (!NavigationUtil.validateReservation(newReservation)) {
+                                        Toast.makeText(context, "时间格式错误或起始时间晚于结束时间", Toast.LENGTH_SHORT).show()
+                                        isLoading.value = false
+                                        Log.d("ReservationButton", "预约信息验证失败：$newReservation")
+                                        return@launch
+                                    }
+                                    Log.d("ReservationButton", "开始检查重复预约：$newReservation")
+                                    if (viewModel.isDuplicateReservation(newReservation)) {
+                                        Toast.makeText(context, "该时间段已有预约，无法重复预约", Toast.LENGTH_SHORT).show()
+                                        isLoading.value = false
+                                        Log.d("ReservationButton", "存在重复预约：$newReservation")
+                                        return@launch
+                                    }
+                                    val reservationId = viewModel.insertReservation(newReservation)
+                                    if (reservationId!= null) {
+                                        val bundle = bundleOf(
+                                            "reservationId" to reservationId,
+                                            "userName" to userName.value,
+                                            "selectedRoomsText" to selectedRoomsText.value,
+                                            "selectedDate" to selectedDate.value,
+                                            "selectedStartTime" to selectedStartTime.value,
+                                            "selectedEndTime" to selectedEndTime.value
+                                        )
+                                        Log.d("NavigationUtil", "Put data: $bundle")
+
+                                        navController.navigate(route = "${ScreenPage.Reservation.route}/$reservationId")
+                                        {
+                                            popUpTo(navController.graph.startDestinationId) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+
+                                        }
+                                        Toast.makeText(context,"预约成功",Toast.LENGTH_SHORT).show()
+
+                                        Log.d("ReservationButton", "预约成功，预约 ID: $reservationId")
+                                    } else {
+                                        Log.d("ReservationButton", "预约失败，插入预约信息返回 null")
+                                    }
+                                } catch (e: Exception) {
+                                    Toast.makeText(context, "预约失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                                    Log.e("ReservationButton", "预约失败，异常信息: ${e.message}", e)
+                                } finally {
+                                    isLoading.value = false
+                                }
+                            }
+                        }
+                    }
+                ) {
+                    Text("确定")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showDialog.value = false }
+                ) {
+                    Text("取消")
+                }
+            }
+        )
     }
 }
 
-
-
-@Composable
-fun IModifyButton(){
-    Button(onClick = {
-    },
-        colors = ButtonDefaults.buttonColors(Color.LightGray)
-    ) {
-        Text(text = "修改", style = TextStyle(color = Color.Black, fontSize = 21.sp))
-    }
-}
-
-
-//修改
+// 修改
 @Composable
 fun ModifyButton(
     reservationId: Long,
@@ -562,78 +523,102 @@ fun ModifyButton(
     selectedRoomsText: MutableState<String>,
     selectedDate: MutableState<String>,
     selectedStartTime: MutableState<String>,
-    selectedEndTime: MutableState<String>
+    selectedEndTime: MutableState<String>,
+    navController: NavController,
+    viewModel: ReservationViewModel
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val isLoading = remember { mutableStateOf(false) }
+    val showDialog = remember { mutableStateOf(false) } // 新增：用于控制弹窗的显示
 
     Button(
         onClick = {
-            if (userName.value.isBlank()
-                || selectedRoomsText.value.isBlank()
-                || selectedDate.value.isBlank()
-                || selectedStartTime.value.isBlank()
-                || selectedEndTime.value.isBlank()) {
-                Toast.makeText(context, "请将信息输入完整", Toast.LENGTH_SHORT).show()
-                return@Button
-            }
-            val sdf = SimpleDateFormat("HH:mm", Locale.CHINA)
-            try {
-                val startTime = sdf.parse(selectedStartTime.value)
-                val endTime = sdf.parse(selectedEndTime.value)
-                if (startTime == null || endTime == null) {
-                    Toast.makeText(context, "时间格式解析出错，请检查输入的时间格式", Toast.LENGTH_SHORT).show()
-                    return@Button
-                }
-                if (startTime.after(endTime)) {
-                    Toast.makeText(context, "起始时间不能晚于结束时间，请重新选择时间后再操作", Toast.LENGTH_SHORT).show()
-                    return@Button
-                }
-            } catch (e: Exception) {
-                Toast.makeText(context, "时间格式解析出错，请检查输入的时间格式", Toast.LENGTH_SHORT).show()
-                return@Button
-            }
-            coroutineScope.launch {
-                try {
-                    val modifiedReservation = Reservation(
-                        id = reservationId,
-                        user = userName.value,
-                        room = selectedRoomsText.value,
-                        date = selectedDate.value,
-                        time1 = selectedStartTime.value,
-                        time2 = selectedEndTime.value
-                    )
-                    // 检查是否存在重复预约
-                    if (ReservationManager.isDuplicateReservation(context, modifiedReservation)) {
-                        Toast.makeText(context, "该时间段已有预约，无法重复预约", Toast.LENGTH_SHORT).show()
-                        return@launch
-                    }
-                    // 更新预约
-                    ReservationManager.updateReservation(context, modifiedReservation)
-                    // 跳转到 SituationActivity 并传递必要的信息
-                    val intent = Intent(context, SituationActivity::class.java)
-                    intent.putExtra("reservationId", reservationId)
-                    intent.putExtra("userName", userName.value)
-                    intent.putExtra("selectedRoomsText", selectedRoomsText.value)
-                    intent.putExtra("selectedDate", selectedDate.value)
-                    intent.putExtra("selectedStartTime", selectedStartTime.value)
-                    intent.putExtra("selectedEndTime", selectedEndTime.value)
-                    context.startActivity(intent)
-                } catch (e: Exception) {
-                    Toast.makeText(context, "修改预约失败: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
+            showDialog.value = true // 点击按钮时显示弹窗
         },
-        colors = ButtonDefaults.buttonColors(Color.LightGray)
+        colors = ButtonDefaults.buttonColors(Color.LightGray),
+        enabled =!isLoading.value
     ) {
-        Text(text = "修改", style = TextStyle(color = Color.Black, fontSize = 21.sp))
+        if (isLoading.value) {
+            CircularProgressIndicator(color = Color.Black, modifier = Modifier.size(20.dp))
+        } else {
+            Text(text = "修改", style = TextStyle(color = Color.Black, fontSize = 21.sp))
+        }
+    }
+
+    if (showDialog.value) { // 显示弹窗
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text(text = "确认修改") },
+            text = { Text("是否确认修改预约信息？") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog.value = false
+                        if (!isLoading.value) {
+                            isLoading.value = true
+                            coroutineScope.launch {
+                                try {
+                                    val modifiedReservation = Reservation(
+                                        id = reservationId,
+                                        user = userName.value,
+                                        room = selectedRoomsText.value,
+                                        date = selectedDate.value,
+                                        time1 = selectedStartTime.value,
+                                        time2 = selectedEndTime.value
+                                    )
+                                    if (!NavigationUtil.validateReservation(modifiedReservation)) {
+                                        Toast.makeText(context, "时间格式错误或起始时间晚于结束时间", Toast.LENGTH_SHORT).show()
+                                        return@launch
+                                    }
+                                    if (viewModel.isDuplicateReservation(modifiedReservation)) {
+                                        Toast.makeText(context, "该时间段已有预约，无法重复预约", Toast.LENGTH_SHORT).show()
+                                        return@launch
+                                    }
+                                    viewModel.updateReservation(modifiedReservation)
+                                    val bundle = bundleOf(
+                                        "reservationId" to reservationId,
+                                        "userName" to userName.value,
+                                        "selectedRoomsText" to selectedRoomsText.value,
+                                        "selectedDate" to selectedDate.value,
+                                        "selectedStartTime" to selectedStartTime.value,
+                                        "selectedEndTime" to selectedEndTime.value
+                                    )
+                                    Log.d("NavigationUtil", "Modify data: $bundle")
+                                    navController.navigate(ScreenPage.List.route) {
+                                        popUpTo(navController.graph.startDestinationId) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                } catch (e: Exception) {
+                                    Toast.makeText(context, "修改预约失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                                } finally {
+                                    isLoading.value = false
+                                }
+                            }
+                        }
+                    }
+                ) {
+                    Text("确定")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showDialog.value = false }
+                ) {
+                    Text("取消")
+                }
+            }
+        )
     }
 }
+
 
 //查看预约情况
 @Composable
 fun SituationButton(navController: NavController) {
-//    val context = LocalContext.current
     Button(
         onClick = {
             navController.navigate(ScreenPage.List.route) { // 跳转到预约情况界面
@@ -643,8 +628,6 @@ fun SituationButton(navController: NavController) {
                 launchSingleTop = true
                 restoreState = true
             }
-//            val intent = Intent(context, SituationActivity::class.java)
-//            context.startActivity(intent)
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray)
     ) {
@@ -654,8 +637,7 @@ fun SituationButton(navController: NavController) {
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun IndexPreview() {
     CardRoom1Theme {
-//        IndexLayout()
     }
 }
