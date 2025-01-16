@@ -1,7 +1,6 @@
 package com.example.cardroom1
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -76,7 +75,6 @@ fun TapBarApp() {
                 ScreenPage.Own.route -> {
                     TopBar(navController, title = "个人中心", showBackButton = true, showMenu = true, menuItems = listOf(
                         MenuItem("设置") { navController.navigate(ScreenPage.Setting.route) },
-                        MenuItem("布局") { logout(navController) }
                     ))
                 }
                 ScreenPage.Index.route->{
@@ -125,7 +123,10 @@ fun TapBarApp() {
                 ReservationApp(navController, viewModel, reservationId)
             }
             composable(ScreenPage.Search.route){ SearchApp(navController) }
-            composable(ScreenPage.Setting.route){ SettingApp() }
+            composable(ScreenPage.Setting.route){
+                val viewModel: SettingViewModel = viewModel()
+                SettingApp(viewModel)
+            }
         }
     }
 }
@@ -182,18 +183,7 @@ fun TopBar(
     )
 }
 
-private fun logout(navController: NavController) {
-    isUserLoggedIn.value = false
-    Log.d("TabBarActivity", "User logged out")
-    navController.navigate(ScreenPage.Login.route) {
-        popUpTo(navController.graph.startDestinationId) {
-            inclusive = true
-            saveState = false
-        }
-        launchSingleTop = true
-        restoreState = false
-    }
-}
+
 
 @Composable
 fun MainNavigationBar(navController: NavController) {
