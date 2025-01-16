@@ -22,4 +22,7 @@
     <string name="title_activity_tab_bar">TabBar</string>
     <string name="title_activity_own">OwnActivity</string>
     <string name="title_activity_top_bar">TopBarActivity</string>
+    <string name="title_activity_search">SearchActivity</string>
+    <string name="search">预订人：</string>
+    <string name="title_activity_setting">SettingActivity</string>
 </resources>

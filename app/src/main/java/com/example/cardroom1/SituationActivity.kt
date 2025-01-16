@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,11 +24,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
@@ -41,7 +41,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.math.roundToInt
 
 class SituationActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,9 +58,9 @@ class SituationActivity : ComponentActivity() {
 fun SituationApp(navController: NavController) {
     val context = LocalContext.current
     val database = ReservationDatabase.getInstance(context)
-    val reservationsFlow = database.reservationDao().getAllReservations() // 这里假设返回的是 Flow
-    val reservationsLiveData = reservationsFlow.asLiveData() // 将 Flow 转换为 LiveData
-    val reservations by reservationsLiveData.observeAsState(initial = emptyList()) // 确保初始值类型匹配
+    val reservationsFlow = database.reservationDao().getAllReservations()
+    val reservationsLiveData = reservationsFlow.asLiveData() //
+    val reservations by reservationsLiveData.observeAsState(initial = emptyList())
     val modifiedReservationId = navController.previousBackStackEntry?.savedStateHandle?.get<Long>("modifiedReservationId")
     val viewModel: ReservationViewModel = viewModel()
     LaunchedEffect(modifiedReservationId) {
@@ -96,15 +95,6 @@ fun SituationLayout(
         }
     }
 
-    val scrollFraction by remember {
-        derivedStateOf {
-            val layoutInfo = listState.layoutInfo
-            val totalItems = layoutInfo.totalItemsCount
-            val firstVisibleIndex = listState.firstVisibleItemIndex
-            firstVisibleIndex / (totalItems - 1).toFloat()
-        }
-    }
-
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -113,77 +103,69 @@ fun SituationLayout(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(450.dp)
+                .height(500.dp)
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .fillMaxWidth(),
-                state = listState
+            LazyColumnScrollbar(
+                state = listState,
+                settings = ScrollbarSettings.Default.copy(
+                    thumbMinLength = 0.1f,
+                    thumbThickness = 16.dp,
+                    thumbShape = CircleShape,
+                    thumbUnselectedColor = Color.LightGray,
+                    thumbSelectedColor = Color.DarkGray,
+                    side = ScrollbarLayoutSide.End,
+                    alwaysShowScrollbar = true,
+                    hideDelayMillis = 0,
+                    hideDisplacement = 0.dp,
+                    hideEasingAnimation = FastOutSlowInEasing,
+                    durationAnimationMillis = 500,
+                )
             ) {
-                items(reservations) { reservation ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = "用户: ${reservation.user}", style = TextStyle(color = Color.Black, fontSize = 20.sp))
-                        Spacer(Modifier.width(16.dp))
-                        Text(text = "房间: ${reservation.room}", style = TextStyle(color = Color.Black, fontSize = 20.sp))
-                        Spacer(Modifier.width(16.dp))
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = "日期: ${reservation.date}", style = TextStyle(color = Color.Black, fontSize = 20.sp))
-                        Spacer(Modifier.width(16.dp))
-                        Text(text = "时间: ${reservation.time1} - ${reservation.time2}", style = TextStyle(color = Color.Black, fontSize = 20.sp))
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        SCancelButton(reservation, viewModel)
-                        Spacer(Modifier.width(4.dp))
-                        SModifyButton(reservation, navController)
-                        Spacer(Modifier.width(4.dp))
-                        RoomButton(navController)
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .fillMaxWidth(),
+                    state = listState
+                ) {
+                    items(reservations) { reservation ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = "用户: ${reservation.user}", style = TextStyle(color = Color.Black, fontSize = 20.sp))
+                            Spacer(Modifier.width(16.dp))
+                            Text(text = "房间: ${reservation.room}", style = TextStyle(color = Color.Black, fontSize = 20.sp))
+                            Spacer(Modifier.width(16.dp))
+                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = "日期: ${reservation.date}", style = TextStyle(color = Color.Black, fontSize = 20.sp))
+                            Spacer(Modifier.width(16.dp))
+                            Text(text = "时间: ${reservation.time1} - ${reservation.time2}", style = TextStyle(color = Color.Black, fontSize = 20.sp))
+                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            SCancelButton(reservation, viewModel)
+                            Spacer(Modifier.width(4.dp))
+                            SModifyButton(reservation, navController)
+                            Spacer(Modifier.width(4.dp))
+                            SRoomButton(navController)
+                        }
                     }
                 }
             }
-
-            // 自定义滚动条
-            Box(
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .fillMaxHeight()
-                    .width(16.dp)
-                    .background(Color.LightGray)
-                    .pointerInput(listState) {
-                        detectVerticalDragGestures { _, dragAmount ->
-                            coroutineScope.launch {
-                                listState.scrollBy(dragAmount)
-                            }
-                        }
-                    }
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxHeight(0.5f)
-                        .background(Color.Black)
-                        .align(Alignment.TopCenter)
-                        .offset {
-                            IntOffset(0, (scrollFraction * (40)).roundToInt())
-                        }
-                )
-            }
         }
+
         if (isAtBottom) {
             Text(text = "已到底部", modifier = Modifier.align(Alignment.CenterHorizontally))
         }
@@ -198,6 +180,78 @@ fun SituationLayout(
 }
 
 
+@Composable
+fun LazyColumnScrollbar(
+    state: LazyListState,
+    settings: ScrollbarSettings = ScrollbarSettings.Default,
+    content: @Composable () -> Unit
+) {
+    val coroutineScope = rememberCoroutineScope()
+
+    // 计算滚动条的位置和长度
+    val scrollFraction by remember {
+        derivedStateOf {
+            val layoutInfo = state.layoutInfo
+            val totalItems = layoutInfo.totalItemsCount
+            val firstVisibleItem = layoutInfo.visibleItemsInfo.firstOrNull()
+            if (totalItems > 1) {
+                firstVisibleItem?.index?.toFloat()?.div(totalItems - 1)?: 0f
+            } else {
+                0f
+            }
+        }
+    }
+
+    val thumbHeight by remember {
+        derivedStateOf {
+            val layoutInfo = state.layoutInfo
+            val totalItems = layoutInfo.totalItemsCount
+            val visibleItems = layoutInfo.visibleItemsInfo.size
+            (visibleItems / totalItems.toFloat()).coerceAtLeast(settings.thumbMinLength)
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(settings.scrollbarPadding)
+    ) {
+        // 滚动条背景
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .fillMaxHeight()
+                .width(settings.thumbThickness)
+                .background(settings.thumbUnselectedColor)
+        )
+
+        // 滚动条拇指
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .fillMaxHeight(thumbHeight)
+                .width(settings.thumbThickness)
+                .offset(y = (scrollFraction * (1 - thumbHeight)).times(520).dp)
+                .clip(settings.thumbShape)
+                .background(settings.thumbSelectedColor)
+                .pointerInput(state) {
+                    detectVerticalDragGestures { _, dragAmount ->
+                        coroutineScope.launch {
+                            state.scrollBy(dragAmount)
+                        }
+                    }
+                }
+        )
+        // 内容
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(end = settings.scrollbarPadding + settings.thumbThickness)
+        ) {
+            content()
+        }
+    }
+}
 
 @Composable
 fun TopBack(coroutineScope: CoroutineScope, listState: LazyListState) {
@@ -219,8 +273,6 @@ fun TopBack(coroutineScope: CoroutineScope, listState: LazyListState) {
         contentDescription = "返回顶部图标"
     )
 }
-
-
 
 
 
@@ -346,7 +398,7 @@ fun UpdateButton(onUpdate: () -> Unit = {}) {
 }
 
 @Composable
-fun RoomButton(
+fun SRoomButton(
     navController: NavController
 ) {
     Button(
@@ -361,7 +413,19 @@ fun RoomButton(
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray)
     ) {
-        Text(text = "前往房间", style = TextStyle(color = Color.Black), fontSize = 25.sp)
+        Text(text = "前往房间", style = TextStyle(color = Color.Black), fontSize = 20.sp)
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun SituationPreview() {
+    CardRoom1Theme {
+        val navController = rememberNavController()
+        val viewModel : ReservationViewModel = viewModel()
+        val reservations by viewModel.reservations.collectAsState(emptyList())
+        SituationLayout(reservations, navController, viewModel)
     }
 }
 

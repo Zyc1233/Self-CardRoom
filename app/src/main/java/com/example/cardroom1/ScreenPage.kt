@@ -54,4 +54,17 @@ sealed class ScreenPage(
         iconSelect = R.drawable.own,
         iconUnselect = R.drawable.own
     )
+
+    object Search : ScreenPage(
+        route = "搜索记录",
+        iconUnselect = R.drawable.own,
+        iconSelect = R.drawable.own
+    )
+
+    object Setting : ScreenPage(
+        route = "设置",
+        iconUnselect = R.drawable.own,
+        iconSelect = R.drawable.own
+    )
+
 }

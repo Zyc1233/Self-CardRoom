@@ -72,4 +72,11 @@ class ReservationViewModel(application: Application) : AndroidViewModel(applicat
     suspend fun getReservationById(reservationId: Long): Reservation? {
         return dao.getReservationById(reservationId)
     }
+
+    fun searchReservationsByName(name: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val searchResults = dao.searchReservationsByName(name)
+            _reservations.value = searchResults
+        }
+    }
 }

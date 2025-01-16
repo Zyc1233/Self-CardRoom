@@ -43,4 +43,8 @@ interface ReservationDao {
         startTime: String,
         endTime: String
     ): Int
+
+    @Query("SELECT * FROM reservations WHERE user LIKE :name")
+    suspend fun searchReservationsByName(name: String): List<Reservation>
+
 }

@@ -148,7 +148,7 @@ fun ReservationLayout(
             Spacer(Modifier.width(40.dp))
             CancelButton(reservationId, navController, viewModel)
             Spacer(Modifier.width(16.dp))
-            SRoomButton(navController)
+            RoomButton(navController)
         }
     }
 }
@@ -213,7 +213,7 @@ fun CancelButton(
 
 
 @Composable
-fun SRoomButton(navController: NavController) {
+fun RoomButton(navController: NavController) {
     Button(
         onClick = {
             navController.navigate(ScreenPage.Room.route){
