@@ -78,7 +78,9 @@ fun TapBarApp() {
                     ))
                 }
                 ScreenPage.Index.route->{
-                    TopBar(navController, title = "房间预约", showBackButton = false,showMenu = true)
+                    TopBar(navController, title = "房间预约", showBackButton = false,showMenu = true, menuItems = listOf(
+                        MenuItem("设置") { navController.navigate(ScreenPage.Setting.route) },
+                    ))
                 }
                 ScreenPage.List.route->{
                     TopBar(navController, title = "预约情况", showBackButton = false, showMenu = true,menuItems = listOf(

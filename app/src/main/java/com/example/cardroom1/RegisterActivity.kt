@@ -6,6 +6,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -22,12 +23,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.edit
@@ -57,19 +58,17 @@ fun RegisterLayout(navController: NavController) {
     val password = remember { mutableStateOf("") }
     val confirmPassword = remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxSize().padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(Modifier.height(16.dp))
-            CommonPhoneText(phone, stringResource(R.string.phone))
+            CommonPhoneText(phone)
             Spacer(Modifier.height(16.dp))
-            NewPasswordText(password, stringResource(R.string.first_password), context)
+            NewPasswordText(password, context)
             Spacer(Modifier.height(16.dp))
-            NewPasswordText(confirmPassword, stringResource(R.string.second_password), context)
+            NewPasswordText(confirmPassword,context)
             Spacer(Modifier.height(16.dp))
             NewRegisterButton(
                 context,
@@ -127,9 +126,7 @@ fun NewRegisterButton(
             }
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray),
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp)
+        modifier = Modifier.fillMaxWidth().height(50.dp)
     ) {
         Text(text = stringResource(R.string.btn_register), color = Color.Black, fontSize = 25.sp)
     }
@@ -137,12 +134,16 @@ fun NewRegisterButton(
 
 
 @Composable
-fun NewPasswordText(passwordState: MutableState<String>, label: String, context: Context) {
+fun NewPasswordText(passwordState: MutableState<String>,context: Context) {
     val minLength = 6
     Row(
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = label)
+        Image(
+            painter = painterResource(R.drawable.new_pasword),
+            contentDescription = null
+        )
         Spacer(modifier = Modifier.width(8.dp))
         val passwordVisibility = remember { mutableStateOf(false) }
         val updatePassword = { newPassword: String ->
@@ -156,8 +157,9 @@ fun NewPasswordText(passwordState: MutableState<String>, label: String, context:
             onValueChange = { newPassword ->
                 updatePassword(newPassword)
             },
+            modifier = Modifier.fillMaxWidth(),
             visualTransformation = if (passwordVisibility.value) VisualTransformation.None else PasswordVisualTransformation(),
-            placeholder = { Text("请输入密码") },
+            placeholder = { Text("请输入密码", fontSize = 16.sp) },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Next
@@ -181,11 +183,3 @@ fun RegisterApp(navController: NavController) {
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun RegisterPreview() {
-    CardRoom1Theme {
-        val navController = rememberNavController()
-        RegisterLayout(navController)
-    }
-}

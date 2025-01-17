@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -27,12 +28,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,9 +73,7 @@ fun LoginApp(navController: NavController) {
     val password = remember { mutableStateOf("") }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+        modifier = Modifier.fillMaxSize().padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         LazyRow(
@@ -132,11 +133,11 @@ fun PasswordLoginLayout(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(Modifier.height(64.dp))
-            Text(text = "密码登录", style = TextStyle(fontSize = 50.sp))
+            Text(text = "密码登录", fontSize = 50.sp)
             Spacer(modifier = Modifier.height(32.dp))
-            CommonPhoneText(phoneState, stringResource(R.string.phone))
+            CommonPhoneText(phoneState)
             Spacer(modifier = Modifier.height(24.dp))
-            CommonPasswordText(passwordState, stringResource(R.string.password),navController)
+            CommonPasswordText(passwordState,navController)
             Spacer(modifier = Modifier.height(24.dp))
             RememberPassword()
             Spacer(modifier = Modifier.height(16.dp))
@@ -158,19 +159,18 @@ fun CodeLoginLayout(
     navController: NavController
 ) {
     val context = LocalContext.current
-    val phone = remember { mutableStateOf("") }
     val code = remember { mutableStateOf("") }
     val generatedCode = remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(Modifier.height(80.dp))
-            Text(text = "验证码登录", style = TextStyle(fontSize = 50.sp))
-            Spacer(modifier = Modifier.height(50.dp))
-            CommonPhoneText(phoneState, stringResource(R.string.phone))
+            Spacer(Modifier.height(64.dp))
+            Text(text = "验证码登录",fontSize = 50.sp)
+            Spacer(modifier = Modifier.height(32.dp))
+            CommonPhoneText(phoneState)
             Spacer(modifier = Modifier.height(24.dp))
             CodeText(coroutineScope, code, generatedCode) // 传递generatedCode
             Spacer(modifier = Modifier.height(24.dp))
@@ -190,12 +190,14 @@ fun CodeLoginLayout(
 @Composable
 fun CommonPhoneText(
     phoneState: MutableState<String>,
-    label: String
 ) {
     Row(
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = label)
+        Image(
+            painter = painterResource(R.drawable.phone),
+            contentDescription = null )
         Spacer(modifier = Modifier.width(8.dp))
         TextField(
             value = phoneState.value,
@@ -204,7 +206,9 @@ fun CommonPhoneText(
                     phoneState.value = newPhone
                 }
             },
-            placeholder = { Text("请输入手机号码") },
+            modifier = Modifier.fillMaxWidth().height(55.dp),
+
+            placeholder = { Text("请输入手机号码", fontSize = 16.sp) },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Next
@@ -216,29 +220,30 @@ fun CommonPhoneText(
 @Composable
 fun CommonPasswordText(
     passwordState: MutableState<String>,
-    label: String,
     navController: NavController
 ) {
     val passwordVisibility = remember { mutableStateOf(false) }
     Row(
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = label)
-        Spacer(Modifier.width(5.dp))
+        Image(
+            painter = painterResource(R.drawable.pasword),
+            contentDescription = null
+        )
+        Spacer(Modifier.width(8.dp))
         TextField(
             value = passwordState.value,
             onValueChange = { newPassword ->
                 passwordState.value = newPassword
             },
             visualTransformation = if (passwordVisibility.value) VisualTransformation.None else PasswordVisualTransformation(),
-            placeholder = { Text("请输入密码") },
+            placeholder = { Text("请输入密码", fontSize = 16.sp) },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Next
             ),
-            modifier = Modifier
-                .width(150.dp)
-                .height(55.dp),
+            modifier = Modifier.width(190.dp).height(55.dp),
             trailingIcon = {
                 val image =
                     if (passwordVisibility.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
@@ -248,7 +253,7 @@ fun CommonPasswordText(
                 }
             }
         )
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(8.dp))
         ForgetButton(navController)
     }
 }
@@ -266,8 +271,7 @@ fun RememberPassword() {
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = stringResource(R.string.btn_remember),
-            style = TextStyle(fontSize = 32.sp),
-            color = Color.Black
+            style = TextStyle(fontSize = 32.sp)
         )
     }
 }
@@ -332,7 +336,8 @@ fun LoginButton(
     ) {
         Text(
             text = stringResource(R.string.btn_login),
-            style = TextStyle(color = Color.Black, fontSize = 32.sp)
+            textAlign = TextAlign.Center,
+            fontSize = 32.sp
         )
     }
 }
@@ -350,9 +355,13 @@ fun ForgetButton(navController: NavController) {
                 restoreState = true
             }
         },
-        colors = ButtonDefaults.buttonColors(Color.LightGray)
+        colors = ButtonDefaults.buttonColors(Color.LightGray),
+        modifier = Modifier.height(55.dp)
     ) {
-        Text(text = stringResource(R.string.btn_forget), style = TextStyle(color = Color.Black))
+        Text(text = stringResource(R.string.btn_forget),
+            fontSize = 16.sp,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
@@ -373,7 +382,8 @@ fun RegisterButton(
     ) {
         Text(
             text = stringResource(R.string.btn_register),
-            style = TextStyle(color = Color.Black, fontSize = 32.sp)
+            textAlign = TextAlign.Center,
+            fontSize = 32.sp
         )
     }
 }
@@ -390,10 +400,14 @@ fun CodeText(
     val cooldownTimer = remember { mutableIntStateOf(cooldownDuration) }
 
     Row(
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = stringResource(R.string.code))
-        Spacer(modifier = Modifier.width(16.dp))
+        Image(
+            painter = painterResource(R.drawable.code),
+            contentDescription = null
+        )
+        Spacer(modifier = Modifier.width(8.dp))
         TextField(
             value = codeState.value,
             onValueChange = { codeState.value = it },
@@ -402,11 +416,8 @@ fun CodeText(
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Done
             ),
-            modifier = Modifier
-                .width(130.dp)
-                .height(55.dp)
-        )
-        Spacer(modifier = Modifier.width(16.dp))
+            modifier = Modifier.width(170.dp).height(55.dp))
+        Spacer(modifier = Modifier.width(8.dp))
         CodeButton(
             coroutineScope,
             showCodeDialog,
@@ -462,18 +473,16 @@ fun CodeButton(
             }
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray),
-        modifier = Modifier
-            .width(120.dp)
-            .height(45.dp)
-    ) {
+        modifier = Modifier.width(150.dp).height(55.dp))
+    {
         Text(
             text = if (isCoolingDown.value) {
                 "${cooldownTimer.intValue}s 后重试"
             } else {
                 "获取验证码"
             },
-            style = TextStyle(fontSize = 13.sp),
-            color = Color.Black
+            fontSize = 16.sp,
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -513,7 +522,11 @@ fun CodeLoginButton(
             .fillMaxWidth()
             .height(50.dp)
     ) {
-        Text(text = stringResource(R.string.btn_login), color = Color.Black, fontSize = 25.sp)
+        Text(
+            text = stringResource(R.string.btn_login),
+            textAlign = TextAlign.Center,
+            fontSize = 25.sp
+        )
     }
 }
 

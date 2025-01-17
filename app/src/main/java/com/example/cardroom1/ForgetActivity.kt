@@ -6,6 +6,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,20 +64,18 @@ fun ForgetLayout(navController: NavController) {
     val coroutineScope = rememberCoroutineScope()
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxSize().padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
-            CommonPhoneText(phone, stringResource(R.string.phone))
-            Spacer(modifier = Modifier.height(8.dp))
-            NewPasswordText(newPassword, stringResource(R.string.first_password), context)
-            Spacer(modifier = Modifier.height(8.dp))
-            NewPasswordText(confirmPassword, stringResource(R.string.second_password), context)
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+            CommonPhoneText(phone)
+            Spacer(modifier = Modifier.height(16.dp))
+            NewPasswordText(newPassword, context)
+            Spacer(modifier = Modifier.height(16.dp))
+            NewPasswordText(confirmPassword, context)
+            Spacer(modifier = Modifier.height(16.dp))
             ForgetCode(context, code, generatedCode)
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             ReSetButton(
                 context,
                 coroutineScope,
@@ -98,11 +98,14 @@ fun ForgetCode(
     generatedCodeState: MutableState<String>
 ) {
     Row(
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Spacer(Modifier.width(5.dp))
-        Text(stringResource(R.string.code))
-        Spacer(modifier = Modifier.width(4.dp))
+        Image(
+            painter = painterResource(R.drawable.code),
+            contentDescription = null
+        )
+        Spacer(modifier = Modifier.width(8.dp))
         TextField(
             value = codeState.value,
             onValueChange = {
@@ -117,7 +120,7 @@ fun ForgetCode(
             },
             placeholder = { Text(text = "请输入验证码", fontSize = 16.sp, color = Color.Black) },
             modifier = Modifier
-                .width(140.dp)
+                .width(200.dp)
                 .height(55.dp)
                 .imePadding(),
             colors = TextFieldDefaults.colors(Color.White)
@@ -139,12 +142,12 @@ fun ForgetCodeButton(codeState: MutableState<String>, generatedCodeState: Mutabl
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray),
         modifier = Modifier
-            .width(120.dp)
+            .width(180.dp)
             .height(55.dp)
     ) {
         Text(
             text = stringResource(R.string.btn_code),
-            style = TextStyle(fontSize = 14.sp),
+            style = TextStyle(fontSize = 18.sp),
             color = Color.Black
         )
     }
