@@ -23,7 +23,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -111,8 +110,7 @@ fun TapBarApp() {
             composable(ScreenPage.Login.route) { LoginApp(navController) }
             composable(ScreenPage.Index.route) {
                 val viewModel: ReservationViewModel = viewModel()
-                val reservations by viewModel.reservations.collectAsState(emptyList())
-                IndexApp(navController,viewModel,reservations)
+                IndexApp(navController,viewModel)
             }
             composable(ScreenPage.List.route) { SituationApp(navController) }
             composable(ScreenPage.Room.route) { RoomApp(navController) }

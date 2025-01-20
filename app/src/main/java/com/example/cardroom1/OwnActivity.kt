@@ -23,7 +23,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInteropFilter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -116,7 +115,6 @@ fun UserHead(currentAvatarUrl: String) {
 
 @Composable
 fun ChangeHead(currentAvatarUrl: String, onAvatarChange: (String) -> Unit) {
-    val context = LocalContext.current
     val drawableList = listOf(
         R.drawable.image1, R.drawable.image2, R.drawable.image3,
         R.drawable.image4, R.drawable.people, R.drawable.image6,

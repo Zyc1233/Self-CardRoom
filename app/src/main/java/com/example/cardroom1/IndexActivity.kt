@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -37,8 +38,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -49,8 +48,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cardroom1.ui.theme.CardRoom1Theme
@@ -73,12 +70,9 @@ class IndexActivity : ComponentActivity() {
             CardRoom1Theme {
                 val navController = rememberNavController()
                 val viewModel: ReservationViewModel = viewModel()
-                val reservations by viewModel.reservations.collectAsState(emptyList())
                 IndexApp(
                     navController = navController,
-                    viewModel = viewModel,
-                    reservations = reservations
-                )
+                    viewModel = viewModel,)
             }
         }
     }
@@ -89,7 +83,6 @@ class IndexActivity : ComponentActivity() {
 fun IndexApp(
     navController: NavController,
     viewModel: ReservationViewModel,
-    reservations: List<Reservation>
 ) {
     val selectedRoomsTextState = remember { mutableStateOf("") }
     val selectedDateState = remember { mutableStateOf("") }
@@ -111,7 +104,7 @@ fun IndexApp(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(8.dp),
+        modifier = Modifier.fillMaxSize().padding(8.dp).imePadding(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.height(16.dp))
@@ -229,7 +222,7 @@ fun RoomText(selectedRoomsText: MutableState<String>) {
 
     Text(
         text = if (selectedRoomsText.value.isNotEmpty()) selectedRoomsText.value else "请选择房间类型",
-        style = TextStyle(color = Color.Black, fontSize = 35.sp),
+        fontSize = 35.sp,
         modifier = Modifier.clickable {
             showDialog.value = true
         }
@@ -289,7 +282,7 @@ fun DateText(selectedDate: MutableState<String>) {
 
     Text(
         text = if (selectedDate.value.isNotEmpty()) selectedDate.value else "请选择预约日期",
-        style = TextStyle(color = Color.Black, fontSize = 35.sp),
+        fontSize = 35.sp,
         modifier = Modifier.clickable { showDateDialog.value = true }
     )
 
@@ -323,7 +316,7 @@ fun StartTimeText(selectedStartTime: MutableState<String>) {
 
     Text(
         text = if (selectedStartTime.value.isNotEmpty()) selectedStartTime.value else "请选择开始时间",
-        style = TextStyle(color = Color.Black, fontSize = 35.sp),
+        fontSize = 35.sp,
         modifier = Modifier.clickable { showTimeDialog.value = true }
     )
 
@@ -357,7 +350,7 @@ fun EndTimeText(selectedEndTime: MutableState<String>) {
 
     Text(
         text = if (selectedEndTime.value.isNotEmpty()) selectedEndTime.value else "请选择结束时间",
-        style = TextStyle(color = Color.Black, fontSize = 35.sp),
+        fontSize = 35.sp,
         modifier = Modifier.clickable { showTimeDialog.value = true }
     )
 
@@ -393,9 +386,9 @@ fun UserName(userName: MutableState<String>) {
             userName.value = newText
         },
         placeholder = {
-            Text("请输入预约人姓名", style = TextStyle(fontSize = 14.sp))
+            Text("请输入预约人姓名", fontSize = 14.sp)
         },
-        modifier = Modifier.width(250.dp).height(50.dp),
+        modifier = Modifier.width(250.dp).height(50.dp).imePadding(),
         colors = TextFieldDefaults.colors(Color.Black)
     )
 }
@@ -426,7 +419,7 @@ fun ReservationButton(
         if (isLoading.value) {
             CircularProgressIndicator(color = Color.Black, modifier = Modifier.size(20.dp))
         } else {
-            Text(text = "预约", style = TextStyle(color = Color.Black, fontSize = 21.sp))
+            Text(text = "预约", fontSize = 21.sp)
         }
     }
 
@@ -542,7 +535,7 @@ fun ModifyButton(
         if (isLoading.value) {
             CircularProgressIndicator(color = Color.Black, modifier = Modifier.size(20.dp))
         } else {
-            Text(text = "修改", style = TextStyle(color = Color.Black, fontSize = 21.sp))
+            Text(text = "修改", fontSize = 21.sp)
         }
     }
 
@@ -631,13 +624,8 @@ fun SituationButton(navController: NavController) {
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray)
     ) {
-        Text(text = "查看预约情况", style = TextStyle(color = Color.Black, fontSize = 21.sp))
+        Text(text = "查看预约情况",  fontSize = 21.sp)
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun IndexPreview() {
-    CardRoom1Theme {
-    }
-}
+

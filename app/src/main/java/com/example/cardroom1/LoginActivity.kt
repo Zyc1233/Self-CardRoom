@@ -30,7 +30,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -271,7 +270,7 @@ fun RememberPassword() {
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = stringResource(R.string.btn_remember),
-            style = TextStyle(fontSize = 32.sp)
+            fontSize = 32.sp
         )
     }
 }
@@ -411,7 +410,7 @@ fun CodeText(
         TextField(
             value = codeState.value,
             onValueChange = { codeState.value = it },
-            placeholder = { Text("请输入验证码", style = TextStyle(fontSize = 14.sp)) },
+            placeholder = { Text("请输入验证码", fontSize = 14.sp) },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Done

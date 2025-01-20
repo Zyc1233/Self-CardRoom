@@ -26,7 +26,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -299,7 +298,7 @@ fun SCancelButton(reservation: Reservation, viewModel: ReservationViewModel) {
                     },
                     colors = ButtonDefaults.buttonColors(Color.LightGray)
                 ) {
-                    Text(text = "确定", style = TextStyle(color = Color.Black, fontSize = 25.sp))
+                    Text(text = "确定",  fontSize = 25.sp)
                 }
             },
             dismissButton = {
@@ -307,7 +306,7 @@ fun SCancelButton(reservation: Reservation, viewModel: ReservationViewModel) {
                     onClick = { openDialog.value = false },
                     colors = ButtonDefaults.buttonColors(Color.LightGray)
                 ) {
-                    Text(text = "取消", style = TextStyle(color = Color.Black, fontSize = 25.sp))
+                    Text(text = "取消", fontSize = 25.sp)
                 }
             }
         )
@@ -317,7 +316,7 @@ fun SCancelButton(reservation: Reservation, viewModel: ReservationViewModel) {
         onClick = { openDialog.value = true },
         colors = ButtonDefaults.buttonColors(Color.LightGray)
     ) {
-        Text(text = "取消预约", style = TextStyle(color = Color.Black, fontSize = 16.sp))
+        Text(text = "取消预约", fontSize = 18.sp, color = Color.Black)
     }
 }
 
@@ -349,7 +348,7 @@ fun SModifyButton(
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray)
     ) {
-        Text(text = "修改预约", style = TextStyle(color = Color.Black, fontSize = 16.sp))
+        Text(text = "修改预约",  fontSize = 18.sp, color = Color.Black)
     }
 }
 
@@ -370,7 +369,7 @@ fun BackButton(navController: NavController) {
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray)
     ) {
-        Text(text = "退出登录", style = TextStyle(color = Color.Black, fontSize = 30.sp))
+        Text(text = "退出登录", fontSize = 30.sp)
     }
 }
 
@@ -393,7 +392,7 @@ fun UpdateButton(onUpdate: () -> Unit = {}) {
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray)
     ) {
-        Text(text = "更新", style = TextStyle(color = Color.Black, fontSize = 30.sp))
+        Text(text = "更新", fontSize = 30.sp)
     }
 }
 
@@ -413,7 +412,7 @@ fun SRoomButton(
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray)
     ) {
-        Text(text = "前往房间",color = Color.Black, fontSize = 20.sp)
+        Text(text = "前往房间",color = Color.Black, fontSize = 18.sp)
     }
 }
 
