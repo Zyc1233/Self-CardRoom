@@ -121,21 +121,21 @@ fun ReservationLayout(
     ) {
         Spacer(Modifier.height(16.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = " 用 户 名： ", style = TextStyle(color = Color.Black, fontSize = 35.sp))
+            Text(text = " 用 户 名： ", fontSize = 35.sp)
             Spacer(Modifier.width(8.dp))
-            Text(text = userName, style = TextStyle(color = Color.Black, fontSize = 35.sp))
+            Text(text = userName, fontSize = 35.sp)
             Spacer(Modifier.width(120.dp))
         }
         Spacer(Modifier.height(24.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = "预约房间：", style = TextStyle(color = Color.Black, fontSize = 35.sp))
+            Text(text = "预约房间：", fontSize = 35.sp)
             Spacer(Modifier.width(8.dp))
-            Text(text = selectedRoomsText, style = TextStyle(color = Color.Black, fontSize = 35.sp))
+            Text(text = selectedRoomsText,fontSize = 35.sp)
             Spacer(Modifier.width(100.dp))
         }
         Spacer(Modifier.height(24.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = "预约时间：", style = TextStyle(color = Color.Black, fontSize = 35.sp))
+            Text(text = "预约时间：", fontSize = 35.sp)
             Spacer(Modifier.width(8.dp))
             Text(text = "$selectedDate $selectedStartTime - $selectedEndTime",
                 style = TextStyle(color = Color.Black, fontSize = 35.sp))
@@ -188,7 +188,7 @@ fun CancelButton(
                     },
                     colors = ButtonDefaults.buttonColors(Color.LightGray)
                 ) {
-                    Text(text = "确定", style = TextStyle(color = Color.Black, fontSize = 25.sp))
+                    Text(text = "确定", fontSize = 25.sp)
                 }
             },
             dismissButton = {
@@ -196,7 +196,7 @@ fun CancelButton(
                     onClick = { openDialog.value = false },
                     colors = ButtonDefaults.buttonColors(Color.LightGray)
                 ) {
-                    Text(text = "取消", style = TextStyle(color = Color.Black, fontSize = 25.sp))
+                    Text(text = "取消",  fontSize = 25.sp)
                 }
             }
         )
@@ -206,7 +206,7 @@ fun CancelButton(
         onClick = { openDialog.value = true },
         colors = ButtonDefaults.buttonColors(Color.LightGray)
     ) {
-        Text(text = "取消预约", style = TextStyle(color = Color.Black, fontSize = 25.sp))
+        Text(text = "取消预约", fontSize = 25.sp)
     }
 }
 
@@ -226,7 +226,7 @@ fun RoomButton(navController: NavController) {
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray)
     ) {
-        Text(text = "前往房间", style = TextStyle(color = Color.Black), fontSize = 25.sp)
+        Text(text = "前往房间", fontSize = 25.sp)
     }
 }
 
