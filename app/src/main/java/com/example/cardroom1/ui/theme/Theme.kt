@@ -12,9 +12,16 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.googlefonts.Font
+import androidx.compose.ui.text.googlefonts.GoogleFont
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cardroom1.AppStyle
+import com.example.cardroom1.R
 import com.example.cardroom1.SettingViewModel
 
 
@@ -173,35 +180,39 @@ val ColdColorScheme = lightColorScheme(
 )
 
 
+val provider = GoogleFont.Provider(
+    providerAuthority = "com.google.android.gms.fonts",
+    providerPackage = "com.google.android.gms",
+    certificates = R.array.com_google_android_gms_fonts_certs
+)
+
+val fontName = GoogleFont("Lobster Two")
+
+val fontFamily = FontFamily(
+    Font(googleFont = fontName, fontProvider = provider)
+)
+
 @Composable
 fun CardRoom1Theme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val viewModel: SettingViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val viewModel: SettingViewModel = viewModel()
     val colorScheme = when (viewModel.themeColorScheme.value) {
         WarmColorScheme -> WarmColorScheme
         ColdColorScheme -> ColdColorScheme
         else -> if (darkTheme) DarkColorScheme else LightColorScheme
     }
     val appStyle by viewModel.appStyle.observeAsState(AppStyle("默认", "默认", "默认"))
+
     val typography = Typography(
         bodyLarge = TextStyle(
-            fontFamily = when (appStyle.fontFamily) {
-                "宋体" -> FontFamily.Serif
-                "楷体" -> FontFamily.SansSerif
-                "斜体" -> FontFamily.Default
-                else -> FontFamily.Default
-            },
-            fontSize = when (appStyle.fontSize) {
-                "超大" -> 35.sp
-                "大" -> 30.sp
-                "默认" -> 25.sp
-                "小号" -> 20.sp
-                "超小" -> 16.sp
-                else -> 16.sp
-            },
-            fontWeight = FontWeight.Normal,
+            fontFamily = fontFamily,
+            fontStyle = getFontStyle(appStyle.fontFamily).fontStyle,
+            fontSize = getFontSize(appStyle.fontSize),
+            fontWeight = getFontStyle(appStyle.fontFamily).fontWeight,
+            color = getFontStyle(appStyle.fontFamily).color,
+            textDecoration = getFontStyle(appStyle.fontFamily).textDecoration,
             lineHeight = 24.sp,
             letterSpacing = 0.5.sp
         )
@@ -212,4 +223,30 @@ fun CardRoom1Theme(
         typography = typography,
         content = content
     )
+}
+
+@Composable
+fun getFontStyle(fontFamily: String): TextStyle {
+    return when (fontFamily) {
+        "粗体" -> TextStyle(fontWeight = FontWeight.Bold)
+        "斜体" -> TextStyle(fontStyle = FontStyle.Italic)
+        "渐变" -> TextStyle(
+            fontWeight = FontWeight.W200,
+            color = Color(0xFF425AD7), // 渐变颜色
+            textDecoration = TextDecoration.None // 渐变效果
+        )
+        else -> TextStyle(fontWeight = FontWeight.Normal)
+    }
+}
+
+@Composable
+fun getFontSize(fontSizeOption: String): TextUnit {
+    return when (fontSizeOption) {
+        "超大" -> 35.sp
+        "大" -> 30.sp
+        "默认" -> 25.sp
+        "小号" -> 20.sp
+        "超小" -> 16.sp
+        else -> 25.sp // 默认字体大小
+    }
 }

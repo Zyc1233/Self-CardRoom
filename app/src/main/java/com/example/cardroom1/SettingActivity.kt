@@ -144,7 +144,7 @@ fun ColorDropMenu(selectedOption: String, onOptionSelected: (String) -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FontDropMenu(selectedOption: String, onOptionSelected: (String) -> Unit) {
-    val options = listOf("宋体", "楷体", "默认", "斜体")
+    val options = listOf("粗体", "斜体", "默认", "渐变")
     var expanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
@@ -154,7 +154,7 @@ fun FontDropMenu(selectedOption: String, onOptionSelected: (String) -> Unit) {
         TextField(
             value = selectedOption,
             onValueChange = { },
-            label = { Text("字体", fontSize = 20.sp) },
+            label = { Text("字体样式", fontSize = 20.sp) },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
             },

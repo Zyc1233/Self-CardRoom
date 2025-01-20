@@ -27,6 +27,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -413,7 +414,7 @@ fun SRoomButton(
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray)
     ) {
-        Text(text = "前往房间", style = TextStyle(color = Color.Black), fontSize = 20.sp)
+        Text(text = "前往房间",color = Color.Black, fontSize = 20.sp)
     }
 }
 
