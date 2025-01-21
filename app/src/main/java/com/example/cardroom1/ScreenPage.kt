@@ -67,4 +67,9 @@ sealed class ScreenPage(
         iconSelect = R.drawable.own
     )
 
+    object About : ScreenPage(
+        route = "关于",
+        iconUnselect = R.drawable.own,
+        iconSelect = R.drawable.own
+    )
 }

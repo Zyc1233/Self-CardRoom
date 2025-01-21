@@ -69,36 +69,45 @@ fun TapBarApp() {
         topBar = {
             when (currentRoute) {
                 ScreenPage.Login.route-> {
-                    TopBar(navController, title = "用户登录", showBackButton = false, showMenu = false)
+                    TopBar(navController, title = "用户登录", showBackButton = false, showMenu = true, menuItems = listOf(
+                        MenuItem("关于"){ navController.navigate(ScreenPage.About.route) }
+                    ))
                 }
                 ScreenPage.Own.route -> {
                     TopBar(navController, title = "个人中心", showBackButton = true, showMenu = true, menuItems = listOf(
                         MenuItem("设置") { navController.navigate(ScreenPage.Setting.route) },
+                        MenuItem("关于"){ navController.navigate(ScreenPage.About.route) }
                     ))
                 }
                 ScreenPage.Index.route->{
                     TopBar(navController, title = "房间预约", showBackButton = false,showMenu = true, menuItems = listOf(
                         MenuItem("设置") { navController.navigate(ScreenPage.Setting.route) },
+                        MenuItem("关于"){ navController.navigate(ScreenPage.About.route) }
                     ))
                 }
                 ScreenPage.List.route->{
                     TopBar(navController, title = "预约情况", showBackButton = false, showMenu = true,menuItems = listOf(
                         MenuItem("搜索记录") {navController.navigate(ScreenPage.Search.route)},
                         MenuItem("设置") { navController.navigate(ScreenPage.Setting.route) },
+                        MenuItem("关于"){ navController.navigate(ScreenPage.About.route) }
                     ))
                 }
                 "${ScreenPage.Room.route}/{reservationId}?&startTime={startTime}&endTime={endTime}"->{
                     TopBar(navController, title = "房间", showBackButton = false, showMenu = true, menuItems = listOf(
                         MenuItem("设置") { navController.navigate(ScreenPage.Setting.route) },
+                        MenuItem("关于"){ navController.navigate(ScreenPage.About.route) }
                     ))
                 }
                 "${ScreenPage.Reservation.route}/{reservationId}"->{
                     TopBar(navController, title = "预约信息", showBackButton = true, showMenu = true, menuItems = listOf(
                         MenuItem("设置") { navController.navigate(ScreenPage.Setting.route) },
+                        MenuItem("关于"){ navController.navigate(ScreenPage.About.route) }
                     ))
                 }
                 else -> {
-                    TopBar(navController, title = currentRoute ?: "", showBackButton = true, showMenu = true)
+                    TopBar(navController, title = currentRoute ?: "", showBackButton = true, showMenu = true, menuItems = listOf(
+                        MenuItem("关于"){ navController.navigate(ScreenPage.About.route) }
+                    ))
                 }
             }
         },
@@ -121,8 +130,6 @@ fun TapBarApp() {
             composable(ScreenPage.List.route) { SituationApp(navController) }
             composable("${ScreenPage.Room.route}/{reservationId}?&startTime={startTime}&endTime={endTime}") { backStackEntry ->
                 val reservationId = backStackEntry.arguments?.getString("reservationId")?.toLongOrNull() ?: -1L
-//                val startTime = backStackEntry.arguments?.getString("startTime") ?: ""
-//                val endTime = backStackEntry.arguments?.getString("endTime") ?: ""
                 RoomApp(navController, reservationId)
             }
             composable(ScreenPage.Own.route) { OwnApp() }
@@ -138,6 +145,7 @@ fun TapBarApp() {
                 val viewModel: SettingViewModel = viewModel()
                 SettingApp(viewModel)
             }
+            composable(ScreenPage.About.route){ AboutApp() }
         }
     }
 }
