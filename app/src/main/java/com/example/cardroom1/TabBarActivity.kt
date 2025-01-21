@@ -84,10 +84,16 @@ fun TapBarApp() {
                 ScreenPage.List.route->{
                     TopBar(navController, title = "预约情况", showBackButton = false, showMenu = true,menuItems = listOf(
                         MenuItem("搜索记录") {navController.navigate(ScreenPage.Search.route)},
+                        MenuItem("设置") { navController.navigate(ScreenPage.Setting.route) },
                     ))
                 }
-                ScreenPage.Room.route->{
-                    TopBar(navController, title = "房间", showBackButton = true, showMenu = true, menuItems = listOf(
+                "${ScreenPage.Room.route}/{reservationId}?&startTime={startTime}&endTime={endTime}"->{
+                    TopBar(navController, title = "房间", showBackButton = false, showMenu = true, menuItems = listOf(
+                        MenuItem("设置") { navController.navigate(ScreenPage.Setting.route) },
+                    ))
+                }
+                "${ScreenPage.Reservation.route}/{reservationId}"->{
+                    TopBar(navController, title = "预约信息", showBackButton = true, showMenu = true, menuItems = listOf(
                         MenuItem("设置") { navController.navigate(ScreenPage.Setting.route) },
                     ))
                 }
@@ -113,7 +119,12 @@ fun TapBarApp() {
                 IndexApp(navController,viewModel)
             }
             composable(ScreenPage.List.route) { SituationApp(navController) }
-            composable(ScreenPage.Room.route) { RoomApp(navController) }
+            composable("${ScreenPage.Room.route}/{reservationId}?&startTime={startTime}&endTime={endTime}") { backStackEntry ->
+                val reservationId = backStackEntry.arguments?.getString("reservationId")?.toLongOrNull() ?: -1L
+//                val startTime = backStackEntry.arguments?.getString("startTime") ?: ""
+//                val endTime = backStackEntry.arguments?.getString("endTime") ?: ""
+                RoomApp(navController, reservationId)
+            }
             composable(ScreenPage.Own.route) { OwnApp() }
             composable(ScreenPage.Forget.route) { ForgetApp(navController) }
             composable(ScreenPage.Register.route) { RegisterApp(navController) }
@@ -190,7 +201,6 @@ fun MainNavigationBar(navController: NavController) {
     val items = listOf(
         ScreenPage.Index,
         ScreenPage.List,
-        ScreenPage.Room,
         ScreenPage.Own
     )
     val navBackStackEntry by navController.currentBackStackEntryAsState()

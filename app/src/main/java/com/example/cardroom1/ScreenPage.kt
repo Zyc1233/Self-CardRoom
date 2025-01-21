@@ -32,7 +32,7 @@ sealed class ScreenPage(
     )
 
     object Room : ScreenPage(
-        route = "房间",
+        route = "房间/{reservationId}",
         iconSelect = R.drawable.home,
         iconUnselect = R.drawable.home
     )
@@ -50,7 +50,7 @@ sealed class ScreenPage(
     )
 
     object Reservation : ScreenPage(
-        route = "预约信息",
+        route = "预约信息/{reservationId}",
         iconSelect = R.drawable.own,
         iconUnselect = R.drawable.own
     )

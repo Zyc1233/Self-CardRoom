@@ -1,9 +1,10 @@
 package com.example.cardroom1
 
 import android.os.Bundle
+import android.os.CountDownTimer
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,13 +19,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -32,68 +36,139 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.cardroom1.ui.theme.CardRoom1Theme
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 class RoomActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             CardRoom1Theme {
                 val navController = rememberNavController()
-                RoomApp(navController)
+                val currentBackStackEntry by navController.currentBackStackEntryAsState()
+                val reservationId = currentBackStackEntry?.arguments?.getLong("reservationId") ?: -1L
+                val startTime = currentBackStackEntry?.arguments?.getString("startTime") ?: ""
+                val endTime = currentBackStackEntry?.arguments?.getString("endTime") ?: ""
+                Log.d("RoomActivity", "Reservation ID: $reservationId, Start Time: $startTime, End Time: $endTime")
+                RoomApp(navController, reservationId)
             }
         }
     }
 }
 
 @Composable
-fun RoomLayout(navController: NavController){
-    Column (modifier = Modifier.fillMaxSize().padding(top = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally){
-        TimeCount()
+fun RoomApp(
+    navController: NavController,
+    reservationId: Long,
+) {
+    val reservation = remember { mutableStateOf<Reservation?>(null) }
+    val isLoading = remember { mutableStateOf(true) }
+    val viewModel: ReservationViewModel = viewModel()
+
+    // 在 LaunchedEffect 中加载预约信息
+    LaunchedEffect(reservationId) {
+        withContext(Dispatchers.IO) {
+            val res = viewModel.getReservationById(reservationId)
+            reservation.value = res
+            isLoading.value = false
+        }
+    }
+
+    // 如果正在加载，显示进度指示器
+    if (isLoading.value) {
+        CircularProgressIndicator(modifier = Modifier.fillMaxSize())
+    } else {
+        // 如果加载完成，显示 RoomLayout
+        reservation.value?.let { res ->
+            RoomLayout(
+                navController = navController,
+                room = res.room,
+                date = res.date,
+                startTime = res.time1,
+                endTime = res.time2
+            )
+        } ?: Text("未找到预约信息")
+    }
+}
+
+
+@Composable
+fun RoomLayout(
+    navController: NavController,
+    room: String,
+    date: String,
+    startTime: String,
+    endTime: String
+) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(top = 16.dp).padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        TimeCount(startTime, endTime)
+        Row(modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "当前房间：$room", fontSize = 25.sp)
+        }
+        Row(modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "预约时间：", fontSize = 25.sp)
+            Text(text = "$date   $startTime-$endTime", fontSize = 25.sp)
+        }
         Spacer(Modifier.height(16.dp))
         Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Start,
-            verticalAlignment =  Alignment.CenterVertically) {
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(text = "温度：", fontSize = 35.sp)
             Text(text = "16°C", fontSize = 35.sp)
         }
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(16.dp))
         Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Start,
-            verticalAlignment =  Alignment.CenterVertically) {
-            Text(text = "湿度：",  fontSize = 35.sp)
-            Text(text = "46%", fontSize = 35.sp)
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "湿度：", fontSize = 35.sp)
+            Text(text = "75%", fontSize = 35.sp)
         }
         Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Start,
-            verticalAlignment =  Alignment.CenterVertically) {
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(text = "门禁", fontSize = 35.sp)
             DoorSwitch()
         }
         Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Start,
-            verticalAlignment =  Alignment.CenterVertically) {
-            Text(text = "窗帘",fontSize = 35.sp)
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "窗帘", fontSize = 35.sp)
             CurtainSwitch()
         }
         Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Start,
-            verticalAlignment =  Alignment.CenterVertically) {
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(text = "风扇", fontSize = 35.sp)
             FanSwitch()
         }
         Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Start,
-            verticalAlignment =  Alignment.CenterVertically) {
-            Text(text = "灯光",fontSize = 35.sp)
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "灯光", fontSize = 35.sp)
             Spacer(Modifier.width(8.dp))
             LightSlider()
         }
@@ -102,32 +177,70 @@ fun RoomLayout(navController: NavController){
     }
 }
 
-@Composable
-fun TimeCount() {
-    // 定义倒计时的总时间（秒）
-    val totalTimeInSeconds = 3600 * 1 + 60 * 30 //1小时30分
-    var seconds by remember { mutableStateOf(totalTimeInSeconds) }
 
-    // 使用 LaunchedEffect 来实现倒计时逻辑
-    LaunchedEffect(key1 = Unit) {
-        while (seconds > 0) {
-            delay(1000) // 每秒更新一次
-            seconds--    // 减少秒数
+
+@Composable
+fun TimeCount(startTime: String, endTime: String) {
+    val dateFormat = SimpleDateFormat("HH:mm", Locale.CHINA)
+    val startCalendar = Calendar.getInstance()
+    val endCalendar = Calendar.getInstance()
+
+    // 解析开始时间和结束时间并设置到 Calendar 实例中
+    startCalendar.time = dateFormat.parse(startTime)?: Date()
+    endCalendar.time = dateFormat.parse(endTime)?: Date()
+
+    // 确保考虑日期因素，设置开始和结束时间的日期部分相同
+    val startDate = startCalendar.get(Calendar.DATE)
+    endCalendar.set(Calendar.DATE, startDate)
+
+    // 计算剩余时间（以毫秒为单位）
+    val startMillis = startCalendar.timeInMillis
+    val endMillis = endCalendar.timeInMillis
+    var remainingMillis by remember { mutableLongStateOf(endMillis - startMillis) }
+
+    var hours by remember { mutableIntStateOf(0) }
+    var minutes by remember { mutableIntStateOf(0) }
+    var secondsLeft by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(remainingMillis) {
+        if (remainingMillis > 0) {
+            val countDownTimer = object : CountDownTimer(remainingMillis, 1000) {
+                override fun onTick(millisUntilFinished: Long) {
+                    remainingMillis = millisUntilFinished
+                    val totalSeconds = (millisUntilFinished / 1000).toInt()
+                    hours = totalSeconds / 3600
+                    minutes = (totalSeconds % 3600) / 60
+                    secondsLeft = totalSeconds % 60
+                }
+
+                override fun onFinish() {
+                    remainingMillis = 0
+                    hours = 0
+                    minutes = 0
+                    secondsLeft = 0
+                    Log.d("TimeCount", "时间已到")
+                }
+            }
+            countDownTimer.start()
         }
     }
-    // 将总秒数转换为小时、分钟和秒
-    val hours = seconds / 3600
-    val minutes = (seconds % 3600) / 60
-    val remainingSeconds = seconds % 60
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+
+
+    Row(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = "剩余时间: $hours 小时 $minutes 分钟 $remainingSeconds 秒",
-            style = MaterialTheme.typography.headlineMedium,
-            fontSize = 28.sp,
-            modifier = Modifier.padding(16.dp)
+            text = if (remainingMillis > 0) {
+                "剩余时间：$hours 小时 $minutes 分钟 $secondsLeft 秒"
+            } else {
+                "时间已到"
+            },
+            fontSize = 25.sp
         )
     }
 }
+
+
+
+
 
 @Composable
 fun DoorSwitch(){
@@ -182,7 +295,7 @@ fun FanSwitch(  ){
 
 @Composable
 fun LightSlider() {
-    val sliderValue = remember { mutableStateOf(80f) }
+    val sliderValue = remember { mutableFloatStateOf(80f) }
     val customSliderColors = SliderDefaults.colors(
         activeTrackColor = Color.Green,
         inactiveTrackColor = Color.LightGray, // 自定义非活动轨道的颜色
@@ -193,9 +306,9 @@ fun LightSlider() {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Slider(
-            value = sliderValue.value,
+            value = sliderValue.floatValue,
             onValueChange = { newValue ->
-                sliderValue.value = newValue
+                sliderValue.floatValue = newValue
             },
             valueRange = 0f..100f,
             steps = 10,
@@ -204,7 +317,7 @@ fun LightSlider() {
         )
         Spacer(modifier = Modifier.width(16.dp))
         Text(
-            text = " ${sliderValue.value.toInt()}",
+            text = " ${sliderValue.floatValue.toInt()}",
             fontSize = 25.sp,
         )
     }
@@ -229,19 +342,3 @@ fun RoomBackButton(navController: NavController){
 
 
 
-
-
-@Composable
-fun RoomApp(navController: NavController){
-    RoomLayout(navController)
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun RoomPreview() {
-    CardRoom1Theme {
-        val navController = rememberNavController()
-        RoomLayout(navController)
-    }
-}

@@ -72,7 +72,8 @@ class IndexActivity : ComponentActivity() {
                 val viewModel: ReservationViewModel = viewModel()
                 IndexApp(
                     navController = navController,
-                    viewModel = viewModel,)
+                    viewModel = viewModel
+                )
             }
         }
     }
@@ -221,7 +222,7 @@ fun RoomText(selectedRoomsText: MutableState<String>) {
     val selectedRooms = remember { mutableStateListOf<String>() }
 
     Text(
-        text = if (selectedRoomsText.value.isNotEmpty()) selectedRoomsText.value else "请选择房间类型",
+        text = if (selectedRoomsText.value.isNotEmpty())  selectedRoomsText.value else "请选择房间类型",
         fontSize = 35.sp,
         modifier = Modifier.clickable {
             showDialog.value = true
@@ -281,7 +282,7 @@ fun DateText(selectedDate: MutableState<String>) {
     val showDateDialog = remember { mutableStateOf(false) }
 
     Text(
-        text = if (selectedDate.value.isNotEmpty()) selectedDate.value else "请选择预约日期",
+        text = if (selectedDate.value.isNotEmpty())  selectedDate.value else "请选择预约日期",
         fontSize = 35.sp,
         modifier = Modifier.clickable { showDateDialog.value = true }
     )
@@ -299,7 +300,7 @@ fun DateText(selectedDate: MutableState<String>) {
                 val selectedCalendar = Calendar.getInstance()
                 selectedCalendar.set(year, month, day)
                 val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
-                selectedDate.value = sdf.format(selectedCalendar.getTime())
+                selectedDate.value = sdf.format(selectedCalendar.time)
                 showDateDialog.value = false
             },
             initialYear,
@@ -315,7 +316,7 @@ fun StartTimeText(selectedStartTime: MutableState<String>) {
     val showTimeDialog = remember { mutableStateOf(false) }
 
     Text(
-        text = if (selectedStartTime.value.isNotEmpty()) selectedStartTime.value else "请选择开始时间",
+        text = if (selectedStartTime.value.isNotEmpty())  selectedStartTime.value else "请选择开始时间",
         fontSize = 35.sp,
         modifier = Modifier.clickable { showTimeDialog.value = true }
     )
@@ -333,7 +334,7 @@ fun StartTimeText(selectedStartTime: MutableState<String>) {
                 selectedCalendar.set(Calendar.HOUR_OF_DAY, hour)
                 selectedCalendar.set(Calendar.MINUTE, minute)
                 val sdf = SimpleDateFormat("HH:mm", Locale.CHINA)
-                selectedStartTime.value = sdf.format(selectedCalendar.getTime())
+                selectedStartTime.value = sdf.format(selectedCalendar.time)
                 showTimeDialog.value = false
             },
             initialHour,
@@ -349,7 +350,7 @@ fun EndTimeText(selectedEndTime: MutableState<String>) {
     val showTimeDialog = remember { mutableStateOf(false) }
 
     Text(
-        text = if (selectedEndTime.value.isNotEmpty()) selectedEndTime.value else "请选择结束时间",
+        text = if (selectedEndTime.value.isNotEmpty())  selectedEndTime.value else "请选择结束时间",
         fontSize = 35.sp,
         modifier = Modifier.clickable { showTimeDialog.value = true }
     )
@@ -367,7 +368,7 @@ fun EndTimeText(selectedEndTime: MutableState<String>) {
                 selectedCalendar.set(Calendar.HOUR_OF_DAY, hour)
                 selectedCalendar.set(Calendar.MINUTE, minute)
                 val sdf = SimpleDateFormat("HH:mm", Locale.CHINA)
-                selectedEndTime.value = sdf.format(selectedCalendar.getTime())
+                selectedEndTime.value = sdf.format(selectedCalendar.time)
                 showTimeDialog.value = false
             },
             initialHour,
@@ -388,7 +389,7 @@ fun UserName(userName: MutableState<String>) {
         placeholder = {
             Text("请输入预约人姓名", fontSize = 14.sp)
         },
-        modifier = Modifier.width(250.dp).height(50.dp).imePadding(),
+        modifier = Modifier.width(250.dp).height(55.dp).imePadding(),
         colors = TextFieldDefaults.colors(Color.Black)
     )
 }
@@ -480,7 +481,7 @@ fun ReservationButton(
                                         }
                                         Toast.makeText(context,"预约成功",Toast.LENGTH_SHORT).show()
 
-                                        Log.d("ReservationButton", "预约成功，预约 ID: $reservationId")
+                                        Log.d("ReservationButton", "预约成功，插入数据库: ID=${reservationId}, 房间=${newReservation.room}, 日期=${newReservation.date}, 时间=${newReservation.time1}-${newReservation.time2}")
                                     } else {
                                         Log.d("ReservationButton", "预约失败，插入预约信息返回 null")
                                     }

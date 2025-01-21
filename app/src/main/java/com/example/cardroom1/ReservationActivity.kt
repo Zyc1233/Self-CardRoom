@@ -1,6 +1,8 @@
 package com.example.cardroom1
 
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -26,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -72,7 +73,7 @@ fun ReservationApp(
             reservation.value = res
             isLoading.value = false
         }
-    }
+        }
 
     if (isLoading.value) {
         CircularProgressIndicator(modifier = Modifier.fillMaxSize())
@@ -119,26 +120,28 @@ fun ReservationLayout(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = " 用 户 名： ", fontSize = 35.sp)
+            Spacer(Modifier.width(16.dp))
+            Text(text = "  用 户 名：", fontSize = 40.sp)
             Spacer(Modifier.width(8.dp))
             Text(text = userName, fontSize = 35.sp)
             Spacer(Modifier.width(120.dp))
         }
         Spacer(Modifier.height(24.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = "预约房间：", fontSize = 35.sp)
+            Spacer(Modifier.width(13.dp))
+            Text(text = "预约房间：", fontSize = 40.sp)
             Spacer(Modifier.width(8.dp))
             Text(text = selectedRoomsText,fontSize = 35.sp)
             Spacer(Modifier.width(100.dp))
         }
         Spacer(Modifier.height(24.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = "预约时间：", fontSize = 35.sp)
-            Spacer(Modifier.width(8.dp))
-            Text(text = "$selectedDate $selectedStartTime - $selectedEndTime",
-                style = TextStyle(color = Color.Black, fontSize = 35.sp))
+            Text(text = "预约时间：", fontSize = 40.sp)
+            Column {
+                Text(text = "$selectedDate  ", fontSize = 35.sp)
+                Text(text = "$selectedStartTime-$selectedEndTime", fontSize = 35.sp) }
         }
         Spacer(Modifier.height(24.dp))
         Row(
@@ -148,7 +151,7 @@ fun ReservationLayout(
             Spacer(Modifier.width(40.dp))
             CancelButton(reservationId, navController, viewModel)
             Spacer(Modifier.width(16.dp))
-            RoomButton(navController)
+            RoomButton(navController, reservationId, selectedStartTime, selectedEndTime)
         }
     }
 }
@@ -213,21 +216,28 @@ fun CancelButton(
 
 
 @Composable
-fun RoomButton(navController: NavController) {
+fun RoomButton(
+    navController: NavController,
+    reservationId: Long,
+    startTime: String,
+    endTime: String
+) {
     Button(
         onClick = {
-            navController.navigate(ScreenPage.Room.route){
+            navController.navigate(route = "${ScreenPage.Room.route}/$reservationId?&startTime=${Uri.encode(startTime)}&endTime=${Uri.encode(endTime)}") {
                 popUpTo(navController.graph.startDestinationId) {
                     saveState = true
                 }
                 launchSingleTop = true
                 restoreState = true
             }
+            Log.d("RoomButton", "Navigating to Room with ID: $reservationId, Start Time: $startTime, End Time: $endTime")
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray)
     ) {
         Text(text = "前往房间", fontSize = 25.sp)
     }
 }
+
 
 

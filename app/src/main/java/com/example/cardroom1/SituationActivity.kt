@@ -1,6 +1,7 @@
 package com.example.cardroom1
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -158,7 +159,7 @@ fun SituationLayout(
                             Spacer(Modifier.width(4.dp))
                             SModifyButton(reservation, navController)
                             Spacer(Modifier.width(4.dp))
-                            SRoomButton(navController)
+                            SRoomButton(navController,reservation)
                         }
                     }
                 }
@@ -398,23 +399,31 @@ fun UpdateButton(onUpdate: () -> Unit = {}) {
 
 @Composable
 fun SRoomButton(
-    navController: NavController
+    navController: NavController,
+    reservation: Reservation
 ) {
     Button(
         onClick = {
-            navController.navigate(ScreenPage.Room.route) { // 跳转到房间界面
+            val reservationId = reservation.id
+            val startTime = reservation.time1
+            val endTime = reservation.time2
+            navController.navigate(route = "${ScreenPage.Room.route}/$reservationId?&startTime=$startTime&endTime=$endTime") {
                 popUpTo(navController.graph.startDestinationId) {
                     saveState = true
                 }
                 launchSingleTop = true
                 restoreState = true
             }
+            Log.d("SRoomButton", "Navigating to Room with ID: $reservationId, Start Time: $startTime, End Time: $endTime")
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray)
     ) {
-        Text(text = "前往房间",color = Color.Black, fontSize = 18.sp)
+        Text(text = "前往房间", color = Color.Black, fontSize = 18.sp)
     }
 }
+
+
+
 
 
 @Preview(showBackground = true)
@@ -427,7 +436,3 @@ fun SituationPreview() {
         SituationLayout(reservations, navController, viewModel)
     }
 }
-
-
-
-

@@ -159,7 +159,7 @@ fun SearchLayout(
                         Spacer(Modifier.width(4.dp))
                         SModifyButton(reservation, navController)
                         Spacer(Modifier.width(4.dp))
-                        SRoomButton(navController)
+                        SRoomButton(navController,reservation)
                     }
                 }
             }
