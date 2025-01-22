@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +25,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -50,6 +52,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
+
 class RoomActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,11 +60,11 @@ class RoomActivity : ComponentActivity() {
             CardRoom1Theme {
                 val navController = rememberNavController()
                 val currentBackStackEntry by navController.currentBackStackEntryAsState()
-                val reservationId = currentBackStackEntry?.arguments?.getLong("reservationId") ?: -1L
-                val startTime = currentBackStackEntry?.arguments?.getString("startTime") ?: ""
-                val endTime = currentBackStackEntry?.arguments?.getString("endTime") ?: ""
+                val reservationId = currentBackStackEntry?.arguments?.getLong("reservationId")?: -1L
+                val startTime = currentBackStackEntry?.arguments?.getString("startTime")?: ""
+                val endTime = currentBackStackEntry?.arguments?.getString("endTime")?: ""
                 Log.d("RoomActivity", "Reservation ID: $reservationId, Start Time: $startTime, End Time: $endTime")
-                RoomApp(navController, reservationId)
+                RoomApp(navController, reservationId, startTime, endTime)
             }
         }
     }
@@ -71,13 +74,15 @@ class RoomActivity : ComponentActivity() {
 fun RoomApp(
     navController: NavController,
     reservationId: Long,
+    startTime: String,
+    endTime: String
 ) {
     val reservation = remember { mutableStateOf<Reservation?>(null) }
     val isLoading = remember { mutableStateOf(true) }
     val viewModel: ReservationViewModel = viewModel()
 
-    // 在 LaunchedEffect 中加载预约信息
-    LaunchedEffect(reservationId) {
+    // 使用 LaunchedEffect 监听 reservationId, startTime 和 endTime 的变化
+    LaunchedEffect(reservationId, startTime, endTime) {
         withContext(Dispatchers.IO) {
             val res = viewModel.getReservationById(reservationId)
             reservation.value = res
@@ -85,20 +90,31 @@ fun RoomApp(
         }
     }
 
-    // 如果正在加载，显示进度指示器
-    if (isLoading.value) {
-        CircularProgressIndicator(modifier = Modifier.fillMaxSize())
-    } else {
-        // 如果加载完成，显示 RoomLayout
-        reservation.value?.let { res ->
-            RoomLayout(
-                navController = navController,
-                room = res.room,
-                date = res.date,
-                startTime = res.time1,
-                endTime = res.time2
-            )
-        } ?: Text("未找到预约信息")
+    // 使用 Box 包裹内容
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        if (isLoading.value) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        } else {
+            reservation.value?.let { res ->
+                RoomLayout(
+                    navController = navController,
+                    room = res.room,
+                    date = res.date,
+                    startTime = res.time1,
+                    endTime = res.time2
+                )
+            } ?: Text("未找到预约信息", modifier = Modifier.align(Alignment.Center))
+        }
+    }
+
+    // 监听导航事件，在离开时清除参数
+    DisposableEffect(Unit) {
+        val backStackEntry = navController.currentBackStackEntry
+        onDispose {
+            backStackEntry?.arguments?.clear()
+        }
     }
 }
 
@@ -239,13 +255,10 @@ fun TimeCount(startTime: String, endTime: String) {
 }
 
 
-
-
-
 @Composable
-fun DoorSwitch(){
+fun DoorSwitch() {
     var switchState by remember { mutableStateOf(false) }
-    val imageResource = if (switchState)R.drawable.door_on else R.drawable.door_off
+    val imageResource = if (switchState) R.drawable.door_on else R.drawable.door_off
     Row(verticalAlignment = Alignment.CenterVertically) {
         Spacer(Modifier.width(16.dp))
         Image(
@@ -258,10 +271,11 @@ fun DoorSwitch(){
         Text(text = if (switchState) "门已打开" else "门已关闭", fontSize = 25.sp)
     }
 }
+
 @Composable
-fun CurtainSwitch(){
+fun CurtainSwitch() {
     var switchState by remember { mutableStateOf(false) }
-    val imageResource = if (switchState)R.drawable.curtain_on else R.drawable.curtain_off
+    val imageResource = if (switchState) R.drawable.curtain_on else R.drawable.curtain_off
     Row(verticalAlignment = Alignment.CenterVertically) {
         Spacer(Modifier.width(16.dp))
         Image(
@@ -274,10 +288,11 @@ fun CurtainSwitch(){
         Text(text = if (switchState) "窗帘已拉开" else "窗帘已封闭", fontSize = 25.sp)
     }
 }
+
 @Composable
-fun FanSwitch(  ){
+fun FanSwitch() {
     var switchState by remember { mutableStateOf(false) }
-    val imageResource = if (switchState)R.drawable.fan1 else R.drawable.fan2
+    val imageResource = if (switchState) R.drawable.fan1 else R.drawable.fan2
     Row(verticalAlignment = Alignment.CenterVertically) {
         Spacer(Modifier.width(16.dp))
         Image(
@@ -290,7 +305,6 @@ fun FanSwitch(  ){
         Text(text = if (switchState) "风扇已开启" else "风扇已关闭", fontSize = 25.sp)
     }
 }
-
 
 
 @Composable
@@ -325,9 +339,9 @@ fun LightSlider() {
 
 
 @Composable
-fun RoomBackButton(navController: NavController){
+fun RoomBackButton(navController: NavController) {
     Button(onClick = {
-        navController.navigate(ScreenPage.Index.route){
+        navController.navigate(ScreenPage.Index.route) {
             popUpTo(navController.graph.startDestinationId) {
                 saveState = true
             }
@@ -339,6 +353,5 @@ fun RoomBackButton(navController: NavController){
         Text(text = "退出房间", fontSize = 30.sp)
     }
 }
-
 
 

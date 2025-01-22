@@ -1,5 +1,6 @@
 package com.example.cardroom1
 
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -407,13 +408,7 @@ fun SRoomButton(
             val reservationId = reservation.id
             val startTime = reservation.time1
             val endTime = reservation.time2
-            navController.navigate(route = "${ScreenPage.Room.route}/$reservationId?&startTime=$startTime&endTime=$endTime") {
-                popUpTo(navController.graph.startDestinationId) {
-                    saveState = true
-                }
-                launchSingleTop = true
-                restoreState = true
-            }
+            navController.navigate(route = "${ScreenPage.Room.route}/$reservationId?startTime=${Uri.encode(startTime)}&endTime=${Uri.encode(endTime)}")
             Log.d("SRoomButton", "Navigating to Room with ID: $reservationId, Start Time: $startTime, End Time: $endTime")
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray)

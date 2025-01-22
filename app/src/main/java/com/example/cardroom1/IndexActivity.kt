@@ -471,14 +471,6 @@ fun ReservationButton(
                                         Log.d("NavigationUtil", "Put data: $bundle")
 
                                         navController.navigate(route = "${ScreenPage.Reservation.route}/$reservationId")
-                                        {
-                                            popUpTo(navController.graph.startDestinationId) {
-                                                saveState = true
-                                            }
-                                            launchSingleTop = true
-                                            restoreState = true
-
-                                        }
                                         Toast.makeText(context,"预约成功",Toast.LENGTH_SHORT).show()
 
                                         Log.d("ReservationButton", "预约成功，插入数据库: ID=${reservationId}, 房间=${newReservation.room}, 日期=${newReservation.date}, 时间=${newReservation.time1}-${newReservation.time2}")

@@ -70,6 +70,7 @@ fun TapBarApp() {
             when (currentRoute) {
                 ScreenPage.Login.route-> {
                     TopBar(navController, title = "用户登录", showBackButton = false, showMenu = true, menuItems = listOf(
+                        MenuItem("设置") { navController.navigate(ScreenPage.Setting.route) },
                         MenuItem("关于"){ navController.navigate(ScreenPage.About.route) }
                     ))
                 }
@@ -93,7 +94,7 @@ fun TapBarApp() {
                     ))
                 }
                 "${ScreenPage.Room.route}/{reservationId}?&startTime={startTime}&endTime={endTime}"->{
-                    TopBar(navController, title = "房间", showBackButton = false, showMenu = true, menuItems = listOf(
+                    TopBar(navController, title = "房间", showBackButton = true, showMenu = true, menuItems = listOf(
                         MenuItem("设置") { navController.navigate(ScreenPage.Setting.route) },
                         MenuItem("关于"){ navController.navigate(ScreenPage.About.route) }
                     ))
@@ -112,7 +113,7 @@ fun TapBarApp() {
             }
         },
         bottomBar = {
-            if (currentRoute !in listOf(ScreenPage.Login.route, ScreenPage.Forget.route, ScreenPage.Register.route)) {
+            if (currentRoute !in listOf(ScreenPage.Login.route, ScreenPage.Forget.route, ScreenPage.Register.route,ScreenPage.About.route)) {
                 MainNavigationBar(navController)
             }
         }
@@ -130,7 +131,9 @@ fun TapBarApp() {
             composable(ScreenPage.List.route) { SituationApp(navController) }
             composable("${ScreenPage.Room.route}/{reservationId}?&startTime={startTime}&endTime={endTime}") { backStackEntry ->
                 val reservationId = backStackEntry.arguments?.getString("reservationId")?.toLongOrNull() ?: -1L
-                RoomApp(navController, reservationId)
+                val startTime = backStackEntry.arguments?.getString("startTime") ?:""
+                val endTime = backStackEntry.arguments?.getString("endTime") ?: ""
+                RoomApp(navController, reservationId, startTime, endTime)
             }
             composable(ScreenPage.Own.route) { OwnApp() }
             composable(ScreenPage.Forget.route) { ForgetApp(navController) }
@@ -166,7 +169,7 @@ fun TopBar(
         navigationIcon = {
             if (showBackButton) {
                 IconButton(onClick = {
-                    navController.popBackStack()
+                    navController.navigateUp()
                     println("返回")
                 }) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")

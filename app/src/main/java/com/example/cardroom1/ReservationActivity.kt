@@ -224,13 +224,7 @@ fun RoomButton(
 ) {
     Button(
         onClick = {
-            navController.navigate(route = "${ScreenPage.Room.route}/$reservationId?&startTime=${Uri.encode(startTime)}&endTime=${Uri.encode(endTime)}") {
-                popUpTo(navController.graph.startDestinationId) {
-                    saveState = true
-                }
-                launchSingleTop = true
-                restoreState = true
-            }
+            navController.navigate(route = "${ScreenPage.Room.route}/$reservationId?&startTime=${Uri.encode(startTime)}&endTime=${Uri.encode(endTime)}")
             Log.d("RoomButton", "Navigating to Room with ID: $reservationId, Start Time: $startTime, End Time: $endTime")
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray)
