@@ -23,4 +23,5 @@
     <string name="search">预订人：</string>
     <string name="title_activity_setting">SettingActivity</string>
     <string name="title_activity_about">AboutActivity</string>
+    <string name="title_activity_user_profile">UserProfileActivity</string>
 </resources>

@@ -237,7 +237,7 @@ fun RoomPrice(){
     // 当前显示的文本索引
     var currentIndex by remember { mutableIntStateOf(0) }
 
-    // 使用 LaunchedEffect 启动一个协程来实现轮播效果
+    // 启动一个协程来实现轮播效果
     LaunchedEffect(Unit) {
         while (true) {
             delay(2000) // 每隔 2 秒切换一次
@@ -245,40 +245,42 @@ fun RoomPrice(){
         }
     }
 
-    // 使用 LazyColumn 创建一个滚动的列表
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White),
         horizontalArrangement = Arrangement.Center
     ) {
-        // 添加表头
-        item {
-            Text(
-                text = "房间价格",
-                fontSize = 30.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(8.dp))
-        }
-
-         //显示轮播的房间价格
+        //显示轮播的房间价格
         item {
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 shape = RoundedCornerShape(8.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
                 Text(
                     text = roomPrices[currentIndex],
-                    fontSize = 25.sp,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color.Black,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(8.dp)
+                    modifier = Modifier.padding(4.dp)
+                )
+            }
+        }
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                shape = RoundedCornerShape(8.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
+            ) {
+                Text(
+                text = "1小时起,每半小时加5元",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(4.dp)
                 )
             }
         }

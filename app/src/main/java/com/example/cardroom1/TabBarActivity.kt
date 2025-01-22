@@ -76,9 +76,7 @@ fun TapBarApp() {
                 }
                 ScreenPage.Own.route -> {
                     TopBar(navController, title = "个人中心", showBackButton = false, showMenu = true, menuItems = listOf(
-                        MenuItem("设置") { navController.navigate(ScreenPage.Setting.route) },
-                        MenuItem("关于"){ navController.navigate(ScreenPage.About.route) }
-                    ))
+                        MenuItem("设置") { navController.navigate(ScreenPage.Setting.route) },))
                 }
                 ScreenPage.Index.route->{
                     TopBar(navController, title = "房间预约", showBackButton = false,showMenu = true, menuItems = listOf(
@@ -135,7 +133,7 @@ fun TapBarApp() {
                 val endTime = backStackEntry.arguments?.getString("endTime") ?: ""
                 RoomApp(navController, reservationId, startTime, endTime)
             }
-            composable(ScreenPage.Own.route) { OwnApp() }
+            composable(ScreenPage.Own.route) { OwnApp(navController) }
             composable(ScreenPage.Forget.route) { ForgetApp(navController) }
             composable(ScreenPage.Register.route) { RegisterApp(navController) }
             composable("${ScreenPage.Reservation.route}/{reservationId}") { backStackEntry ->
@@ -233,13 +231,7 @@ fun MainNavigationBar(navController: NavController) {
                         navController.navigate(ScreenPage.Login.route)
                         Toast.makeText(context, "请先登录", Toast.LENGTH_SHORT).show()
                     } else {
-                        navController.navigate(screenPage.route) {
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+                        navController.navigate(screenPage.route)
                     }
                 },
                 icon = {
