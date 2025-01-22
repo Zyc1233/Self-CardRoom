@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -29,6 +30,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -38,11 +41,14 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +58,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cardroom1.ui.theme.CardRoom1Theme
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.core.os.bundleOf
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -108,19 +116,21 @@ fun IndexApp(
         modifier = Modifier.fillMaxSize().padding(8.dp).imePadding(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(8.dp))
         ImageGroup()
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(8.dp))
+        RoomPrice()
+        Spacer(Modifier.height(8.dp))
         RoomText(selectedRoomsTextState)
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(8.dp))
         DateText(selectedDateState)
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(8.dp))
         StartTimeText(selectedStartTimeState)
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(8.dp))
         EndTimeText(selectedEndTimeState)
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(8.dp))
         UserName(userNameState)
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             ReservationButton(
                 viewModel,
@@ -193,7 +203,8 @@ fun ImageGroup(){
                             .background(
                                 if (index == pagerState.currentPage)
                                     Color(0xFF28E9C9) else
-                                    Color.White.copy(alpha = 0.5f))
+                                    Color.White.copy(alpha = 0.5f)
+                            )
                         )
                     }
                 }
@@ -212,6 +223,68 @@ fun ImageGroup(){
         }
     }
 }
+
+
+
+@Composable
+fun RoomPrice(){
+    val roomPrices = listOf(
+        "麻将室  20元/小时",
+        "象棋室  10元/小时",
+        "扑克室  20元/小时",
+        "桌游室  30元/小时"
+    )
+    // 当前显示的文本索引
+    var currentIndex by remember { mutableIntStateOf(0) }
+
+    // 使用 LaunchedEffect 启动一个协程来实现轮播效果
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(2000) // 每隔 2 秒切换一次
+            currentIndex = (currentIndex + 1) % roomPrices.size
+        }
+    }
+
+    // 使用 LazyColumn 创建一个滚动的列表
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        // 添加表头
+        item {
+            Text(
+                text = "房间价格",
+                fontSize = 30.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(8.dp))
+        }
+
+         //显示轮播的房间价格
+        item {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                shape = RoundedCornerShape(8.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
+            ) {
+                Text(
+                    text = roomPrices[currentIndex],
+                    fontSize = 25.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Black,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
+        }
+    }
+}
+
 
 
 //选择房间

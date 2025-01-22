@@ -75,7 +75,7 @@ fun TapBarApp() {
                     ))
                 }
                 ScreenPage.Own.route -> {
-                    TopBar(navController, title = "个人中心", showBackButton = true, showMenu = true, menuItems = listOf(
+                    TopBar(navController, title = "个人中心", showBackButton = false, showMenu = true, menuItems = listOf(
                         MenuItem("设置") { navController.navigate(ScreenPage.Setting.route) },
                         MenuItem("关于"){ navController.navigate(ScreenPage.About.route) }
                     ))
