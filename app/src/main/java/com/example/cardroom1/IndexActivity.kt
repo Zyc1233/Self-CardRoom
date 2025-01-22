@@ -389,7 +389,7 @@ fun UserName(userName: MutableState<String>) {
         placeholder = {
             Text("请输入预约人姓名", fontSize = 14.sp)
         },
-        modifier = Modifier.width(250.dp).height(55.dp).imePadding(),
+        modifier = Modifier.width(250.dp).height(60.dp),
         colors = TextFieldDefaults.colors(Color.Black)
     )
 }
@@ -571,13 +571,7 @@ fun ModifyButton(
                                         "selectedEndTime" to selectedEndTime.value
                                     )
                                     Log.d("NavigationUtil", "Modify data: $bundle")
-                                    navController.navigate(ScreenPage.List.route) {
-                                        popUpTo(navController.graph.startDestinationId) {
-                                            saveState = true
-                                        }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
+                                    navController.navigate(ScreenPage.List.route)
                                 } catch (e: Exception) {
                                     Toast.makeText(context, "修改预约失败: ${e.message}", Toast.LENGTH_SHORT).show()
                                 } finally {
@@ -607,13 +601,7 @@ fun ModifyButton(
 fun SituationButton(navController: NavController) {
     Button(
         onClick = {
-            navController.navigate(ScreenPage.List.route) { // 跳转到预约情况界面
-                popUpTo(navController.graph.startDestinationId) {
-                    saveState = true
-                }
-                launchSingleTop = true
-                restoreState = true
-            }
+            navController.navigate(ScreenPage.List.route)
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray)
     ) {

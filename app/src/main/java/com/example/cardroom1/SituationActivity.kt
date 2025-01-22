@@ -361,13 +361,7 @@ fun BackButton(navController: NavController) {
     Button(
         onClick = {
             isUserLoggedIn.value = false
-            navController.navigate(ScreenPage.Login.route){
-                popUpTo(navController.graph.startDestinationId) {
-                    saveState = true
-                }
-                launchSingleTop = true
-                restoreState = true
-            }
+            navController.navigate(ScreenPage.Login.route)
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray)
     ) {

@@ -181,13 +181,7 @@ fun ReSetButton(
                     try {
                         userDao.resetUserPassword(phone, newPassword)
                         Toast.makeText(context, "密码重置成功", Toast.LENGTH_SHORT).show()
-                        navController.navigate(ScreenPage.Login.route) {
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+                        navController.navigate(ScreenPage.Login.route)
                         Log.v("Forget","重置成功")
                     } catch (e: Exception) {
                         Toast.makeText(context, "用户不存在或重置失败", Toast.LENGTH_SHORT).show()

@@ -134,9 +134,9 @@ fun SearchLayout(
                             .padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = "用户: ${reservation.user}", style = TextStyle(color = Color.Black, fontSize = 20.sp))
+                        Text(text = "用户: ${reservation.user}", fontSize = 20.sp)
                         Spacer(Modifier.width(16.dp))
-                        Text(text = "房间: ${reservation.room}", style = TextStyle(color = Color.Black, fontSize = 20.sp))
+                        Text(text = "房间: ${reservation.room}",  fontSize = 20.sp)
                         Spacer(Modifier.width(16.dp))
                     }
                     Row(
@@ -145,9 +145,9 @@ fun SearchLayout(
                             .padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = "日期: ${reservation.date}", style = TextStyle(color = Color.Black, fontSize = 20.sp))
+                        Text(text = "日期: ${reservation.date}", fontSize = 20.sp)
                         Spacer(Modifier.width(16.dp))
-                        Text(text = "时间: ${reservation.time1} - ${reservation.time2}", style = TextStyle(color = Color.Black, fontSize = 20.sp))
+                        Text(text = "时间: ${reservation.time1} - ${reservation.time2}",  fontSize = 20.sp)
                     }
                     Row(
                         modifier = Modifier

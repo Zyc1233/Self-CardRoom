@@ -319,13 +319,7 @@ fun LoginButton(
                 if (storedPhone == phone && storedPassword == password) {
                     context.showToast("登录成功")
                     isUserLoggedIn.value = true
-                    navController.navigate(ScreenPage.Index.route) {
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
+                    navController.navigate(ScreenPage.Index.route)
                 } else {
                     context.showToast("密码错误或账号未注册")
                 }
@@ -346,13 +340,7 @@ fun LoginButton(
 fun ForgetButton(navController: NavController) {
     Button(
         onClick = {
-            navController.navigate(ScreenPage.Forget.route) {
-                popUpTo(navController.graph.startDestinationId) {
-                    saveState = true
-                }
-                launchSingleTop = true
-                restoreState = true
-            }
+            navController.navigate(ScreenPage.Forget.route)
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray),
         modifier = Modifier.height(55.dp)
@@ -369,13 +357,7 @@ fun RegisterButton(
     navController: NavController) {
     Button(
         onClick = {
-            navController.navigate(ScreenPage.Register.route) {
-                popUpTo(navController.graph.startDestinationId) {
-                    saveState = true
-                }
-                launchSingleTop = true
-                restoreState = true
-            }
+            navController.navigate(ScreenPage.Register.route)
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray)
     ) {
@@ -504,13 +486,7 @@ fun CodeLoginButton(
                 } else if (code == generatedCode.value) {
                     context.showToast("登录成功")
                     isUserLoggedIn.value = true
-                    navController.navigate(ScreenPage.Index.route) {
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
+                    navController.navigate(ScreenPage.Index.route)
                 } else {
                     context.showToast("手机号或验证码错误")
                 }

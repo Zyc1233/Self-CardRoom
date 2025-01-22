@@ -107,13 +107,7 @@ fun NewRegisterButton(
                             preferences[passwordKey] = password
                         }
                         context.showToast("注册成功")
-                        navController.navigate(ScreenPage.Login.route) {
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+                        navController.navigate(ScreenPage.Login.route)
                         Log.d("RegisterActivity", "注册成功，跳转到登录页面")
                     } catch (e: Exception) {
                         context.showToast("注册失败: ${e.message}")
