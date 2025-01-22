@@ -86,7 +86,7 @@ fun AboutLayout() {
             fontSize = 18.sp
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "有问题请拨打：12345678912")
+        Text(text = "有问题请联系：12345678912")
     }
 }
 

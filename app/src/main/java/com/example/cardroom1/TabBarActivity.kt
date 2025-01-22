@@ -111,7 +111,17 @@ fun TapBarApp() {
             }
         },
         bottomBar = {
-            if (currentRoute !in listOf(ScreenPage.Login.route, ScreenPage.Forget.route, ScreenPage.Register.route,ScreenPage.About.route)) {
+            if (currentRoute !in listOf(
+                    ScreenPage.Login.route,
+                    ScreenPage.Forget.route,
+                    ScreenPage.Register.route,
+                    ScreenPage.About.route,
+                    ScreenPage.Search.route,
+                    ScreenPage.Setting.route,
+                    ScreenPage.About.route,
+                    "${ScreenPage.Room.route}/{reservationId}?&startTime={startTime}&endTime={endTime}",
+                    "${ScreenPage.Reservation.route}/{reservationId}"
+                )) {
                 MainNavigationBar(navController)
             }
         }

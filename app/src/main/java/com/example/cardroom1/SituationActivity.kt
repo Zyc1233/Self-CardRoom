@@ -339,13 +339,7 @@ fun SModifyButton(
                 putString("selectedStartTime", reservation.time1)
                 putString("selectedEndTime", reservation.time2)
             }
-            navController.navigate(ScreenPage.Index.route) {
-                popUpTo(navController.graph.startDestinationId) {
-                    saveState = true
-                }
-                launchSingleTop = true
-                restoreState = true
-            }
+            navController.navigate(ScreenPage.Index.route)
             navController.previousBackStackEntry?.savedStateHandle?.set("reservationData", bundle)
         },
         colors = ButtonDefaults.buttonColors(Color.LightGray)
