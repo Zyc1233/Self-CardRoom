@@ -196,7 +196,8 @@ fun CommonPhoneText(
     ) {
         Image(
             painter = painterResource(R.drawable.phone),
-            contentDescription = null )
+            contentDescription = null
+        )
         Spacer(modifier = Modifier.width(8.dp))
         TextField(
             value = phoneState.value,
@@ -206,11 +207,10 @@ fun CommonPhoneText(
                 }
             },
             modifier = Modifier.fillMaxWidth().height(55.dp),
-
             placeholder = { Text("请输入手机号码", fontSize = 16.sp) },
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Next
+                keyboardType = KeyboardType.Phone, // 修改为 Phone 类型
+                imeAction = ImeAction.Done
             )
         )
     }

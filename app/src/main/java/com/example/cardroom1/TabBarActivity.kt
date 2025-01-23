@@ -75,17 +75,17 @@ fun TapBarApp() {
                     ))
                 }
                 ScreenPage.Own.route -> {
-                    TopBar(navController, title = "个人中心", showBackButton = false, showMenu = true, menuItems = listOf(
+                    TopBar(navController, title = "个人中心", showBackButton = true, showMenu = true, menuItems = listOf(
                         MenuItem("设置") { navController.navigate(ScreenPage.Setting.route) },))
                 }
                 ScreenPage.Index.route->{
-                    TopBar(navController, title = "房间预约", showBackButton = false,showMenu = true, menuItems = listOf(
+                    TopBar(navController, title = "房间预约", showBackButton = true,showMenu = true, menuItems = listOf(
                         MenuItem("设置") { navController.navigate(ScreenPage.Setting.route) },
                         MenuItem("关于"){ navController.navigate(ScreenPage.About.route) }
                     ))
                 }
                 ScreenPage.List.route->{
-                    TopBar(navController, title = "预约情况", showBackButton = false, showMenu = true,menuItems = listOf(
+                    TopBar(navController, title = "预约情况", showBackButton = true, showMenu = true,menuItems = listOf(
                         MenuItem("搜索记录") {navController.navigate(ScreenPage.Search.route)},
                         MenuItem("设置") { navController.navigate(ScreenPage.Setting.route) },
                         MenuItem("关于"){ navController.navigate(ScreenPage.About.route) }
@@ -99,6 +99,13 @@ fun TapBarApp() {
                 }
                 "${ScreenPage.Reservation.route}/{reservationId}"->{
                     TopBar(navController, title = "预约信息", showBackButton = true, showMenu = true, menuItems = listOf(
+                        MenuItem("设置") { navController.navigate(ScreenPage.Setting.route) },
+                        MenuItem("关于"){ navController.navigate(ScreenPage.About.route) }
+                    ))
+                }
+                ScreenPage.Count.route ->{
+                    TopBar(navController, title = "计算费用", showBackButton = true, showMenu = true, menuItems = listOf(
+                        MenuItem("查看记录") {navController.navigate(ScreenPage.Search.route)},
                         MenuItem("设置") { navController.navigate(ScreenPage.Setting.route) },
                         MenuItem("关于"){ navController.navigate(ScreenPage.About.route) }
                     ))

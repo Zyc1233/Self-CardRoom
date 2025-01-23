@@ -3,7 +3,9 @@ package com.example.cardroom1
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -11,7 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -32,51 +34,30 @@ class CountActivity : ComponentActivity() {
 
 @Composable
 fun CountApp() {
-    val image = painterResource(R.drawable.cardroom)
-    Box(modifier = Modifier.fillMaxSize()) {
-        Image(
-            painter = image,
-            contentDescription = "Card Room Background",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
-    }
     CountLayout()
 }
 
 @Composable
 fun CountLayout() {
-    val startTime = remember { mutableLongStateOf(System.currentTimeMillis()) }
-    val currentTime = remember { mutableLongStateOf(System.currentTimeMillis()) }
-    val timeUsed by remember { derivedStateOf { (currentTime.longValue - startTime.longValue) / 1000.0 / 60.0 } } // 转换为分钟
-    val totalCharge by remember {
-        derivedStateOf {
-            val hours = timeUsed.toInt() / 60
-            val minutes = timeUsed.toInt() % 60
-            val extraCharges = if (minutes >= 30) 5 else 0
-            20 * hours + extraCharges
-        }
-    }
-
     // 房间类型和价格
     val rooms = listOf(
-        Room("麻将室", 20),
-        Room("象棋室", 15),
-        Room("扑克室", 20),
-        Room("桌游室", 30)
+        Room("麻将室", 30),
+        Room("象棋室", 20),
+        Room("扑克室", 30),
+        Room("桌游室", 40)
     )
     var selectedRoom by remember { mutableStateOf(rooms.first()) }
     var inputTime by remember { mutableStateOf("") }
     var showResult by remember { mutableStateOf(false) }
     var result by remember { mutableStateOf("总费用: 0元") }
-
-
+    // 添加VIP状态变量
+    var isVip by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
     ) {
+        ZoomableImage()
         Card(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -122,14 +103,30 @@ fun CountLayout() {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // 添加VIP单选框
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Checkbox(
+                        checked = isVip,
+                        onCheckedChange = { isVip = it }
+                    )
+                    Text(text = "我是VIP（享受8折优惠）", fontSize = 18.sp)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
                 // 计算按钮
                 Button(
                     onClick = {
                         val time = inputTime.toIntOrNull() ?: 0
-                        result = calculateFee(selectedRoom, time)
+                        result = calculateFee(selectedRoom, time, isVip)
                         showResult = true
                     },
-                    modifier = Modifier.fillMaxWidth().height(50.dp)
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
                 ) {
                     Text(text = "计算费用", fontSize = 28.sp, textAlign = TextAlign.Center, color = Color.Black)
                 }
@@ -144,17 +141,59 @@ fun CountLayout() {
         }
     }
 }
+@Composable
+fun ZoomableImage() {
+    var isZoomed by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(
+        targetValue = if (isZoomed) 1.5f else 1f,
+        label = "scale"
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(280.dp)
+            .clickable { isZoomed = !isZoomed }
+    ) {
+        Image(
+            painter = painterResource(R.drawable.roomcount),
+            contentDescription = "roomCount",
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                }
+        )
+    }
+}
 
 // 将 Room 数据类移到外部
 data class Room(val name: String, val pricePerHour: Int)
 
-// 费用计算函数
-fun calculateFee(room: Room, time: Int): String {
+// 修改calculateFee函数，增加VIP参数
+fun calculateFee(room: Room, time: Int, isVip: Boolean): String {
     if (time <= 0) return "总费用: 0元"
-    val hours = time / 60
-    val minutes = time % 60
-    val baseFee = room.pricePerHour * hours
-    val extraFee = if (minutes > 0) 10 + (minutes / 30) * 5 else 0
-    return "总费用: ${baseFee + extraFee}元"
-}
 
+    // 如果时间不足1小时，按1小时计算
+    val totalMinutes = if (time < 60) 60 else time
+
+    // 计算总费用
+    val hours = totalMinutes / 60
+    val baseFee = room.pricePerHour * hours
+
+    // 计算剩余分钟数（不足1小时的部分）
+    val remainingMinutes = totalMinutes % 60
+
+    // 如果剩余分钟数大于0，按半小时收费
+    val extraFee = if (remainingMinutes > 0) {
+        (remainingMinutes + 29) / 30 * 5 // 不足半小时按半小时计算
+    } else {
+        0
+    }
+
+    // 如果是VIP，享受8折优惠
+    val totalFee = baseFee + extraFee
+    val finalFee = if (isVip) totalFee * 0.8 else totalFee
+    return "总费用: ${finalFee.toInt()}元"
+}

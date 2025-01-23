@@ -74,7 +74,7 @@ sealed class ScreenPage(
     )
 
     object Count : ScreenPage(
-        route = "费用计算",
+        route = "计算费用",
         iconUnselect = R.drawable.count,
         iconSelect = R.drawable.count
     )
