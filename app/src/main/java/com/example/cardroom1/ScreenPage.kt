@@ -72,4 +72,10 @@ sealed class ScreenPage(
         iconUnselect = R.drawable.own,
         iconSelect = R.drawable.own
     )
+
+    object Count : ScreenPage(
+        route = "费用计算",
+        iconUnselect = R.drawable.count,
+        iconSelect = R.drawable.count
+    )
 }

@@ -24,4 +24,5 @@
     <string name="title_activity_setting">SettingActivity</string>
     <string name="title_activity_about">AboutActivity</string>
     <string name="title_activity_user_profile">UserProfileActivity</string>
+    <string name="title_activity_count">CountActivity</string>
 </resources>

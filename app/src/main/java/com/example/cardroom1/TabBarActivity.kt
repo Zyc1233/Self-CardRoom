@@ -157,6 +157,7 @@ fun TapBarApp() {
                 SettingApp(viewModel)
             }
             composable(ScreenPage.About.route){ AboutApp() }
+            composable(ScreenPage.Count.route){ CountApp() }
         }
     }
 }
@@ -220,6 +221,7 @@ fun MainNavigationBar(navController: NavController) {
     val items = listOf(
         ScreenPage.Index,
         ScreenPage.List,
+        ScreenPage.Count,
         ScreenPage.Own
     )
     val navBackStackEntry by navController.currentBackStackEntryAsState()

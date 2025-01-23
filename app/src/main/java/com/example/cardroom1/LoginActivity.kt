@@ -57,7 +57,7 @@ class LoginActivity : ComponentActivity() {
         setContent {
             CardRoom1Theme {
                 val navController = rememberNavController()
-                LoginApp(navController)
+                LoginApp(navController) // 启动登录应用
             }
         }
     }
@@ -88,8 +88,8 @@ fun LoginApp(navController: NavController) {
             }
         }
         when (selectedLoginOption) {
-            "密码登录" -> PasswordLoginLayout(phone, password, navController)
-            "验证码登录" -> CodeLoginLayout(phone, navController)
+            "密码登录" -> PasswordLoginLayout(phone, password, navController) // 密码登录布局
+            "验证码登录" -> CodeLoginLayout(phone, navController) // 验证码登录布局
         }
     }
 }
@@ -132,13 +132,13 @@ fun PasswordLoginLayout(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(Modifier.height(64.dp))
-            Text(text = "密码登录", fontSize = 50.sp)
+            Text(text = "密码登录", fontSize = 50.sp) // 显示密码登录标题
             Spacer(modifier = Modifier.height(32.dp))
-            CommonPhoneText(phoneState)
+            CommonPhoneText(phoneState) // 手机号输入框
             Spacer(modifier = Modifier.height(24.dp))
-            CommonPasswordText(passwordState,navController)
+            CommonPasswordText(passwordState, navController) // 密码输入框
             Spacer(modifier = Modifier.height(24.dp))
-            RememberPassword()
+            RememberPassword() // 记住密码选项
             Spacer(modifier = Modifier.height(16.dp))
             LoginAndRegisterButtons(
                 context,
@@ -146,7 +146,7 @@ fun PasswordLoginLayout(
                 phoneState.value,
                 passwordState.value,
                 navController
-            )
+            ) // 登录和注册按钮
         }
     }
 }
@@ -167,11 +167,11 @@ fun CodeLoginLayout(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(Modifier.height(64.dp))
-            Text(text = "验证码登录",fontSize = 50.sp)
+            Text(text = "验证码登录", fontSize = 50.sp) // 显示验证码登录标题
             Spacer(modifier = Modifier.height(32.dp))
-            CommonPhoneText(phoneState)
+            CommonPhoneText(phoneState) // 手机号输入框
             Spacer(modifier = Modifier.height(24.dp))
-            CodeText(coroutineScope, code, generatedCode) // 传递generatedCode
+            CodeText(coroutineScope, code, generatedCode) // 验证码输入框和获取验证码按钮
             Spacer(modifier = Modifier.height(24.dp))
             CodeLoginButton(
                 context,
@@ -180,7 +180,7 @@ fun CodeLoginLayout(
                 code.value,
                 generatedCode,
                 navController
-            )
+            ) // 验证码登录按钮
         }
     }
 }
@@ -317,11 +317,11 @@ fun LoginButton(
                 val storedPassword = dataStore.data
                     .map { preferences -> preferences[passwordKey] }.first()
                 if (storedPhone == phone && storedPassword == password) {
-                    context.showToast("登录成功")
+                    context.showToast("登录成功") // 登录成功提示
                     isUserLoggedIn.value = true
-                    navController.navigate(ScreenPage.Index.route)
+                    navController.navigate(ScreenPage.Index.route) // 导航到首页
                 } else {
-                    context.showToast("密码错误或账号未注册")
+                    context.showToast("密码错误或账号未注册") // 登录失败提示
                 }
             }
         },
@@ -482,13 +482,13 @@ fun CodeLoginButton(
         onClick = {
             coroutineScope.launch {
                 if (phone.isBlank() || code.isBlank()) {
-                    context.showToast("请将信息输入完整！")
+                    context.showToast("请将信息输入完整！") // 提示用户输入完整信息
                 } else if (code == generatedCode.value) {
-                    context.showToast("登录成功")
+                    context.showToast("登录成功") // 登录成功提示
                     isUserLoggedIn.value = true
-                    navController.navigate(ScreenPage.Index.route)
+                    navController.navigate(ScreenPage.Index.route) // 导航到首页
                 } else {
-                    context.showToast("手机号或验证码错误")
+                    context.showToast("手机号或验证码错误") // 登录失败提示
                 }
             }
         },
