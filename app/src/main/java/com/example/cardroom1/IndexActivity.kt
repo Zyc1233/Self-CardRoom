@@ -230,8 +230,8 @@ fun ImageGroup(){
 fun RoomPrice(){
     val roomPrices = listOf(
         "麻将室  20元/小时",
-        "象棋室  10元/小时",
         "扑克室  20元/小时",
+        "象棋室  10元/小时",
         "桌游室  30元/小时"
     )
     // 当前显示的文本索引
@@ -240,7 +240,7 @@ fun RoomPrice(){
     // 启动一个协程来实现轮播效果
     LaunchedEffect(Unit) {
         while (true) {
-            delay(2000) // 每隔 2 秒切换一次
+            delay(3000) // 每隔 2 秒切换一次
             currentIndex = (currentIndex + 1) % roomPrices.size
         }
     }
